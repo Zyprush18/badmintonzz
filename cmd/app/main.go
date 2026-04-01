@@ -4,22 +4,29 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/Zyprush18/badmintonzz/internal/interface/http"
+	"github.com/Zyprush18/badmintonzz/internal/database"
+	"github.com/Zyprush18/badmintonzz/internal/routes"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
 func main() {
-	// use env
 	if err:= godotenv.Load();err != nil {
 		log.Fatal("Failed Load Env")
+	}
+
+	db, err := database.Connect_DB()
+	if err != nil {
+		log.Fatal("Failed Connect Database")
 	}
 
 
 	router := gin.Default()
 
 	v1 := router.Group("/v1")
-	http.RegisteRoute(v1)
+	users := v1.Group("/users")
+
+	routes.RegisterRouteUser(users, db)
 	
 	fmt.Println("🚀 server running on Port: 8080")
 
