@@ -1,6 +1,9 @@
 package schedule
 
-import "time"
+import (
+	"database/sql"
+	"time"
+)
 
 
 type Schedules struct {
@@ -9,4 +12,6 @@ type Schedules struct {
 	Time time.Time
 	Duration int
 	Service_id int
+	Created_at sql.NullTime
+	Updated_at sql.NullTime
 }
