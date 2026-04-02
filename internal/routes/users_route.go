@@ -14,5 +14,6 @@ func RegisterRouteUser(r *gin.RouterGroup, db *sqlx.DB)  {
 	user_hndl := interfaces.NewHandlerUsers(user_svc)
 
 	r.GET("/", user_hndl.Index)
+	r.GET("/:id", user_hndl.Show)
 
 }

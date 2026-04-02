@@ -19,7 +19,8 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed Connect Database")
 	}
-
+	
+	defer db.Close()
 
 	router := gin.Default()
 

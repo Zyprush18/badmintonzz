@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/Zyprush18/badmintonzz/internal/config"
 	_ "github.com/go-sql-driver/mysql"
@@ -17,6 +18,8 @@ func Connect_DB() (*sqlx.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// defer db.Close()
 
 
 	if err:= db.Ping();err != nil {
@@ -95,6 +98,9 @@ func Connect_DB() (*sqlx.DB, error) {
 	
 
 	log.Println("Success Migrate Database")
+
+	db.SetConnMaxLifetime(30 * time.Minute)
+	db.SetConnMaxIdleTime(30)
 
 	return db, nil
 }
