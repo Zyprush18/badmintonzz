@@ -18,7 +18,7 @@ type userServices struct {
 }
 
 
-func NewServiceUsers(r infrastructure.UsersRepo) ServiceUsers {
+func GetQueriesUsers(r infrastructure.UsersRepo) ServiceUsers {
 	return &userServices{repo: r}
 }
 

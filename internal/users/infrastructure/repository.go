@@ -4,12 +4,14 @@ import (
 	"context"
 
 	"github.com/Zyprush18/badmintonzz/internal/users/domain"
+	"github.com/Zyprush18/badmintonzz/internal/users/interfaces/request"
 	"github.com/jmoiron/sqlx"
 )
 
 type UsersRepo interface {
 	GetUsers(ctx context.Context) ([]domain.Users, error)
 	GetUser(ctx context.Context, id int) (*domain.Users, error)
+	CreateUser(ctx context.Context, user *request.UserRequest) error
 }
 
 
@@ -40,4 +42,10 @@ func (u *repoUsers) GetUser(ctx context.Context, id int) (*domain.Users, error) 
 	}
 
 	return &user, nil
+}
+
+
+func (u *repoUsers) CreateUser(ctx context.Context, user *request.UserRequest) error {
+	_, err := u.db.NamedExecContext(ctx, "INSERT INTO users (username, email, password, no_hp) VALUES (:username, :email, :password, :no_hp)", user)
+	return err
 }
