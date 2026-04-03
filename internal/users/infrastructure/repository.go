@@ -12,6 +12,8 @@ type UsersRepo interface {
 	GetUsers(ctx context.Context) ([]domain.Users, error)
 	GetUser(ctx context.Context, id int) (*domain.Users, error)
 	CreateUser(ctx context.Context, user *request.UserRequest) error
+	UpdateUser(ctx context.Context, user map[string]interface{}) error
+	DeleteUser(ctx context.Context, id int) error
 }
 
 
@@ -47,5 +49,16 @@ func (u *repoUsers) GetUser(ctx context.Context, id int) (*domain.Users, error) 
 
 func (u *repoUsers) CreateUser(ctx context.Context, user *request.UserRequest) error {
 	_, err := u.db.NamedExecContext(ctx, "INSERT INTO users (username, email, password, no_hp) VALUES (:username, :email, :password, :no_hp)", user)
+	return err
+}
+
+
+func (u *repoUsers) UpdateUser(ctx context.Context, user map[string]interface{}) error {
+	_, err := u.db.NamedExecContext(ctx, "UPDATE users SET username = :username, email = :email, password = :password, no_hp = :no_hp, updated_at = :updated_at WHERE id = :id", user)
+	return err
+}
+
+func (u *repoUsers) DeleteUser(ctx context.Context, id int) error {
+	_, err := u.db.ExecContext(ctx, "DELETE FROM users WHERE id = ?", id)
 	return err
 }

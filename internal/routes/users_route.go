@@ -16,5 +16,7 @@ func RegisterRouteUser(r *gin.RouterGroup, db *sqlx.DB)  {
 	r.GET("/", user_hndl.Index)
 	r.POST("/", user_hndl.Create)
 	r.GET("/:id", user_hndl.Show)
+	r.PUT("/:id", user_hndl.Update)
+	r.DELETE("/:id", user_hndl.Delete)
 
 }

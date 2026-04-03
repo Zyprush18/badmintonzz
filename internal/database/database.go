@@ -33,9 +33,11 @@ func Connect_DB() (*sqlx.DB, error) {
 			username VARCHAR(255) NOT NULL,
 			email VARCHAR(255) UNIQUE NOT NULL,
 			password VARCHAR(255) NOT NULL,
-			no_hp VARCHAR(20) NOT NULL,
+			no_hp VARCHAR(20) UNIQUE NOT NULL,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+			CONSTRAINT uk_users_email_phone UNIQUE (email, no_hp)
 		);
 
 		CREATE TABLE IF NOT EXISTS services (
@@ -83,9 +85,6 @@ func Connect_DB() (*sqlx.DB, error) {
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			FOREIGN KEY (booking_id) REFERENCES bookings(id)
 		);
-
-		ALTER TABLE users DROP CONSTRAINT uk_users_email;
-		ALTER TABLE users ADD CONSTRAINT uk_users_email UNIQUE (email)
 `
 
 

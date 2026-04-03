@@ -15,7 +15,7 @@ var (
 	InvalidID string = "Invalid User ID"
 	InvalidRequest string = "Invalid request body"
 	InvalidValidation string = "Invalid validation"
-	DuplicateUser string = "User already exists"
+	DuplicateUser string = "User  email or phone number already exists"
 )
 
 
