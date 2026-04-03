@@ -25,9 +25,7 @@ func main() {
 	router := gin.Default()
 
 	v1 := router.Group("/v1")
-	users := v1.Group("/users")
-
-	routes.RegisterRouteUser(users, db)
+	routes.RegisterRoute(v1, db)
 	
 	fmt.Println("🚀 server running on Port: 8080")
 

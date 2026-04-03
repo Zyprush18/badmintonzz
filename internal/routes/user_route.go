@@ -8,15 +8,15 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func RegisterRouteUser(r *gin.RouterGroup, db *sqlx.DB)  {
+func RegisterRouteUsers(users *gin.RouterGroup, db *sqlx.DB)  {
 	user_repo := infrastructure.NewRepoUsers(db)
 	user_svc := application.NewServiceUsers(user_repo)
 	user_hndl := interfaces.NewHandlerUsers(user_svc)
 
-	r.GET("/", user_hndl.Index)
-	r.POST("/", user_hndl.Create)
-	r.GET("/:id", user_hndl.Show)
-	r.PUT("/:id", user_hndl.Update)
-	r.DELETE("/:id", user_hndl.Delete)
+	users.GET("/", user_hndl.Index)
+	users.POST("/", user_hndl.Create)
+	users.GET("/:id", user_hndl.Show)
+	users.PUT("/:id", user_hndl.Update)
+	users.DELETE("/:id", user_hndl.Delete)
 
 }

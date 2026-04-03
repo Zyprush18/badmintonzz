@@ -1,12 +1,12 @@
 package domain
 
-import "database/sql"
+import "time"
 
 
 type Services struct {
 	ID int
 	Name string
 	Price float64
-	Created_at sql.NullTime
-	Updated_at sql.NullTime
+	Created_at time.Time
+	Updated_at time.Time
 }

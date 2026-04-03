@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/Zyprush18/badmintonzz/internal/shared/errs"
 	"github.com/Zyprush18/badmintonzz/internal/shared/validation"
 	"github.com/Zyprush18/badmintonzz/internal/users/application"
 	"github.com/Zyprush18/badmintonzz/internal/users/domain"
@@ -27,7 +28,7 @@ func (s *HandlerUsers) Index(c *gin.Context) {
 	users, err := s.svc.QueriesUsers().GetUsers(c.Request.Context())
 	if err != nil {
 		log.Println(err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"message": domain.ServerError})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": errs.ServerError})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
@@ -48,13 +49,13 @@ func (s *HandlerUsers) Show(c *gin.Context) {
 
 	user, err := s.svc.QueriesUsers().GetUser(c.Request.Context(), userID)
 	if err != nil {
-		if errors.Is(err, domain.NotFoundRow) {
+		if errors.Is(err, errs.NotFoundRow) {
 			c.JSON(http.StatusNotFound, gin.H{"message": domain.NotFoundUser})
 			return
 		}
 
 		log.Println(err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"message": domain.ServerError})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": errs.ServerError})
 		return
 	}
 
@@ -68,13 +69,13 @@ func (s *HandlerUsers) Show(c *gin.Context) {
 func (s *HandlerUsers) Create(c *gin.Context) {
 	user := new(request.UserRequest)
 	if err := c.ShouldBindJSON(user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": domain.InvalidRequest})
+		c.JSON(http.StatusBadRequest, gin.H{"message": errs.InvalidRequest})
 		return
 	}
 
 	if err:= validation.ValidateCheckFields(c.Request.Context(), user);err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": domain.InvalidValidation,
+			"message": errs.InvalidValidation,
 			"error": err.Error(),
 		})
 		return
@@ -87,7 +88,7 @@ func (s *HandlerUsers) Create(c *gin.Context) {
 			return
 		}
 
-		c.JSON(http.StatusInternalServerError, gin.H{"message": domain.ServerError})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": errs.ServerError})
 		return
 	}
 
@@ -107,13 +108,13 @@ func (s *HandlerUsers) Update(c *gin.Context) {
 
 	user := new(request.UserRequest)
 	if err := c.ShouldBindJSON(user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": domain.InvalidRequest})
+		c.JSON(http.StatusBadRequest, gin.H{"message": errs.InvalidRequest})
 		return
 	}
 
 	if err:= validation.ValidateCheckFields(c.Request.Context(), user);err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": domain.InvalidValidation,
+			"message": errs.InvalidValidation,
 			"error": err.Error(),
 		})
 		return
@@ -121,7 +122,7 @@ func (s *HandlerUsers) Update(c *gin.Context) {
 
 	if err := s.svc.CommandsUsers().UpdateUsers(c.Request.Context(), userID, user); err != nil {
 		log.Println(err.Error())
-		if errors.Is(err, domain.NotFoundRow) {
+		if errors.Is(err, errs.NotFoundRow) {
 			c.JSON(http.StatusNotFound, gin.H{"message": domain.NotFoundUser})
 			return
 		}
@@ -131,7 +132,7 @@ func (s *HandlerUsers) Update(c *gin.Context) {
 			return
 		}
 
-		c.JSON(http.StatusInternalServerError, gin.H{"message": domain.ServerError})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": errs.ServerError})
 		return
 	}
 
@@ -151,12 +152,12 @@ func (s *HandlerUsers) Delete(c *gin.Context) {
 
 	if err := s.svc.CommandsUsers().DeleteUsers(c.Request.Context(), userID); err != nil {
 		log.Println(err.Error())
-		if errors.Is(err, domain.NotFoundRow) {
+		if errors.Is(err, errs.NotFoundRow) {
 			c.JSON(http.StatusNotFound, gin.H{"message": domain.NotFoundUser})
 			return
 		}
 
-		c.JSON(http.StatusInternalServerError, gin.H{"message": domain.ServerError})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": errs.ServerError})
 		return
 	}
 
