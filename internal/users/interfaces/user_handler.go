@@ -1,6 +1,7 @@
 package interfaces
 
 import (
+	"context"
 	"errors"
 	"log"
 	"net/http"
@@ -28,6 +29,12 @@ func (s *HandlerUsers) Index(c *gin.Context) {
 	users, err := s.svc.QueriesUsers().GetUsers(c.Request.Context())
 	if err != nil {
 		log.Println(err.Error())
+		if errors.Is(err, context.DeadlineExceeded) {
+			c.JSON(http.StatusRequestTimeout, gin.H{"message": errs.RequestTimeout})
+			return
+		}
+
+
 		c.JSON(http.StatusInternalServerError, gin.H{"message": errs.ServerError})
 		return
 	}
@@ -49,12 +56,18 @@ func (s *HandlerUsers) Show(c *gin.Context) {
 
 	user, err := s.svc.QueriesUsers().GetUser(c.Request.Context(), userID)
 	if err != nil {
+		log.Println(err.Error())
+
+		if errors.Is(err, context.DeadlineExceeded) {
+			c.JSON(http.StatusRequestTimeout, gin.H{"message": errs.RequestTimeout})
+			return
+		}
+
 		if errors.Is(err, errs.NotFoundRow) {
 			c.JSON(http.StatusNotFound, gin.H{"message": domain.NotFoundUser})
 			return
 		}
 
-		log.Println(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"message": errs.ServerError})
 		return
 	}
@@ -83,6 +96,11 @@ func (s *HandlerUsers) Create(c *gin.Context) {
 
 	if err := s.svc.CommandsUsers().CreateUsers(c.Request.Context(), user); err != nil {
 		log.Println(err.Error())
+		if errors.Is(err, context.DeadlineExceeded) {
+			c.JSON(http.StatusRequestTimeout, gin.H{"message": errs.RequestTimeout})
+			return
+		}
+
 		if domain.CheckDuplicate(err) {
 			c.JSON(http.StatusConflict, gin.H{"message": domain.DuplicateUser})
 			return
@@ -122,6 +140,11 @@ func (s *HandlerUsers) Update(c *gin.Context) {
 
 	if err := s.svc.CommandsUsers().UpdateUsers(c.Request.Context(), userID, user); err != nil {
 		log.Println(err.Error())
+		if errors.Is(err, context.DeadlineExceeded) {
+			c.JSON(http.StatusRequestTimeout, gin.H{"message": errs.RequestTimeout})
+			return
+		}
+
 		if errors.Is(err, errs.NotFoundRow) {
 			c.JSON(http.StatusNotFound, gin.H{"message": domain.NotFoundUser})
 			return
@@ -152,6 +175,11 @@ func (s *HandlerUsers) Delete(c *gin.Context) {
 
 	if err := s.svc.CommandsUsers().DeleteUsers(c.Request.Context(), userID); err != nil {
 		log.Println(err.Error())
+		if errors.Is(err, context.DeadlineExceeded) {
+			c.JSON(http.StatusRequestTimeout, gin.H{"message": errs.RequestTimeout})
+			return
+		}
+
 		if errors.Is(err, errs.NotFoundRow) {
 			c.JSON(http.StatusNotFound, gin.H{"message": domain.NotFoundUser})
 			return

@@ -5,6 +5,7 @@ import (
 
 	"github.com/Zyprush18/badmintonzz/internal/services/domain"
 	"github.com/Zyprush18/badmintonzz/internal/services/interfaces/request"
+	"github.com/Zyprush18/badmintonzz/internal/shared/cntx"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -29,6 +30,10 @@ func NewRepoServices(d *sqlx.DB) RepoServices {
 
 
 func (d *database) GetServices(ctx context.Context) ([]domain.Services, error) {
+	ctx, cancel := cntx.TimeOutContext(ctx, cntx.DbMediumTime)
+	defer cancel()
+
+
 	var services []domain.Services
 	err := d.db.SelectContext(ctx, &services, "SELECT * FROM services")
 	if err != nil {
@@ -39,6 +44,9 @@ func (d *database) GetServices(ctx context.Context) ([]domain.Services, error) {
 
 
 func (d *database) GetServiceByID(ctx context.Context, id int) (*domain.Services, error) {
+	ctx, cancel := cntx.TimeOutContext(ctx, cntx.DbShortTime)
+	defer cancel()
+
 	var service domain.Services
 	err := d.db.GetContext(ctx, &service, "SELECT * FROM services WHERE id = ?", id)
 	if err != nil {
@@ -49,6 +57,9 @@ func (d *database) GetServiceByID(ctx context.Context, id int) (*domain.Services
 
 
 func (d *database) CreateService(ctx context.Context, service *request.Services) error {
+	ctx, cancel := cntx.TimeOutContext(ctx, cntx.DbMediumTime)
+	defer cancel()
+
 	_, err := d.db.NamedExecContext(ctx, "INSERT INTO services (name, price) VALUES (:name, :price)", service)
 	if err != nil {
 		return err
@@ -58,6 +69,10 @@ func (d *database) CreateService(ctx context.Context, service *request.Services)
 
 
 func (d *database) UpdateService(ctx context.Context, service map[string]interface{}) error {
+	ctx, cancel := cntx.TimeOutContext(ctx, cntx.DbMediumTime)
+	defer cancel()
+
+
 	_,err := d.db.NamedExecContext(ctx, "UPDATE services SET name = :name, price = :price, updated_at = :updated_at WHERE id = :id", service)
 	if err != nil {
 		return err
@@ -67,6 +82,9 @@ func (d *database) UpdateService(ctx context.Context, service map[string]interfa
 
 
 func (d *database) DeleteService(ctx context.Context, id int) error {
+	ctx, cancel := cntx.TimeOutContext(ctx, cntx.DbShortTime)
+	defer cancel()
+
 	_, err := d.db.ExecContext(ctx, "DELETE FROM services WHERE id = ?", id)
 	if err != nil {
 		return err

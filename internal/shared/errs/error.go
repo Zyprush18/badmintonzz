@@ -7,4 +7,5 @@ var (
 	NotFoundRow error = sql.ErrNoRows
 	InvalidRequest string = "Invalid request body"
 	InvalidValidation string = "Invalid validation"
+	RequestTimeout string = "Request Timeout"
 )

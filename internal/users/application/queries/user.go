@@ -53,7 +53,7 @@ func (r *userServices) ConvertToResponse(user *domain.Users) response.UserRespon
 		Username:   user.Username,
 		Email:      user.Email,
 		No_Hp:      user.No_Phone,
-		Created_at: user.Create_at,
+		Created_at: user.Created_at,
 		Updated_at: user.Updated_at,
 	}
 }

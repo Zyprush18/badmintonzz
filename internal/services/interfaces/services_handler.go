@@ -1,6 +1,7 @@
 package interfaces
 
 import (
+	"context"
 	"errors"
 	"log"
 	"net/http"
@@ -28,6 +29,12 @@ func (a *HandlerServices) Index(c *gin.Context)  {
 	data, err := a.app.QueriesServices().GetServices(c.Request.Context())
 	if err != nil {
 		log.Println(err.Error())
+		if errors.Is(err, context.DeadlineExceeded) {
+			c.JSON(http.StatusRequestTimeout, gin.H{"message": errs.RequestTimeout})
+			return
+		}
+
+
 		c.JSON(http.StatusInternalServerError, gin.H{"message": errs.ServerError})
 		return
 	}
@@ -50,6 +57,11 @@ func (a *HandlerServices) Show(c *gin.Context) {
 	service, err := a.app.QueriesServices().GetServiceByID(c.Request.Context(),serviceID)
 	if err != nil {
 		log.Println(err.Error())
+		if errors.Is(err, context.DeadlineExceeded) {
+			c.JSON(http.StatusRequestTimeout, gin.H{"message": errs.RequestTimeout})
+			return
+		}
+
 		if errors.Is(err, errs.NotFoundRow) {
 			c.JSON(http.StatusNotFound, gin.H{"message": domain.NotFoundService})
 			return
@@ -85,6 +97,11 @@ func (a *HandlerServices) Create(c *gin.Context) {
 
 	if err := a.app.CommandsServices().CreateService(c.Request.Context(), service); err != nil {
 		log.Println(err.Error())
+		if errors.Is(err, context.DeadlineExceeded) {
+			c.JSON(http.StatusRequestTimeout, gin.H{"message": errs.RequestTimeout})
+			return
+		}
+
 		c.JSON(http.StatusInternalServerError, gin.H{"message": errs.ServerError})
 		return
 	}
@@ -119,6 +136,11 @@ func (a *HandlerServices) Update(c *gin.Context) {
 
 	if err := a.app.CommandsServices().UpdateService(c.Request.Context(), serviceID, service); err != nil {
 		log.Println(err.Error())
+		if errors.Is(err, context.DeadlineExceeded) {
+			c.JSON(http.StatusRequestTimeout, gin.H{"message": errs.RequestTimeout})
+			return
+		}
+
 		if errors.Is(err, errs.NotFoundRow) {
 			c.JSON(http.StatusNotFound, gin.H{"message": domain.NotFoundService})
 			return
@@ -145,6 +167,11 @@ func (a *HandlerServices) Delete(c *gin.Context) {
 
 	if err := a.app.CommandsServices().DeleteService(c.Request.Context(), serviceID); err != nil {
 		log.Println(err.Error())
+		if errors.Is(err, context.DeadlineExceeded) {
+			c.JSON(http.StatusRequestTimeout, gin.H{"message": errs.RequestTimeout})
+			return
+		}
+		
 		if errors.Is(err, errs.NotFoundRow) {
 			c.JSON(http.StatusNotFound, gin.H{"message": domain.NotFoundService})
 			return
