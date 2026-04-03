@@ -14,4 +14,8 @@ func RegisterRouteServices(services *gin.RouterGroup, db *sqlx.DB)  {
 	svc_handl := interfaces.NewHandlerService(svc_app)
 
 	services.GET("/", svc_handl.Index)
+	services.POST("/", svc_handl.Create)
+	services.GET("/:id", svc_handl.Show)
+	services.PUT("/:id", svc_handl.Update)
+	services.DELETE("/:id", svc_handl.Delete)
 }
