@@ -62,6 +62,7 @@ func Connect_DB() (*sqlx.DB, error) {
 
 		CREATE TABLE IF NOT EXISTS bookings (
 			id INT AUTO_INCREMENT PRIMARY KEY,
+			amount DECIMAL(10, 2) NOT NULL,
 			type_payment VARCHAR(255) NOT NULL,
 			status ENUM('pending', 'confirmed', 'cancelled') NOT NULL,
 			description TEXT DEFAULT NULL,

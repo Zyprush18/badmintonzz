@@ -1,6 +1,9 @@
 package errs
 
-import "database/sql"
+import (
+	"context"
+	"database/sql"
+)
 
 var (
 	ServerError string = "Internal Server Error"
@@ -8,4 +11,5 @@ var (
 	InvalidRequest string = "Invalid request body"
 	InvalidValidation string = "Invalid validation"
 	RequestTimeout string = "Request Timeout"
+	ContextTimeout error = context.DeadlineExceeded
 )

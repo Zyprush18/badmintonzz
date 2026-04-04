@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/Zyprush18/badmintonzz/internal/shared/cntx"
 	"github.com/Zyprush18/badmintonzz/internal/shared/errs"
 	"github.com/Zyprush18/badmintonzz/internal/shared/validation"
 	"github.com/Zyprush18/badmintonzz/internal/users/application"
@@ -26,7 +27,10 @@ func NewHandlerUsers(s application.ServicesUsers) *HandlerUsers {
 
 
 func (s *HandlerUsers) Index(c *gin.Context) {
-	users, err := s.svc.QueriesUsers().GetUsers(c.Request.Context())
+	ctx, cancel := cntx.TimeoutLongContext(c.Request.Context())
+	defer cancel()
+
+	users, err := s.svc.QueriesUsers().GetUsers(ctx)
 	if err != nil {
 		log.Println(err.Error())
 		if errors.Is(err, context.DeadlineExceeded) {
@@ -54,7 +58,10 @@ func (s *HandlerUsers) Show(c *gin.Context) {
 		return
 	}
 
-	user, err := s.svc.QueriesUsers().GetUser(c.Request.Context(), userID)
+	ctx, cancel := cntx.TimeoutShortContext(c.Request.Context())
+	defer cancel()
+
+	user, err := s.svc.QueriesUsers().GetUser(ctx, userID)
 	if err != nil {
 		log.Println(err.Error())
 
@@ -86,7 +93,12 @@ func (s *HandlerUsers) Create(c *gin.Context) {
 		return
 	}
 
-	if err:= validation.ValidateCheckFields(c.Request.Context(), user);err != nil {
+
+	ctx, cancel := cntx.TimeoutLongContext(c.Request.Context())
+	defer cancel()
+
+
+	if err:= validation.ValidateCheckFields(ctx, user);err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": errs.InvalidValidation,
 			"error": err.Error(),
@@ -94,7 +106,8 @@ func (s *HandlerUsers) Create(c *gin.Context) {
 		return
 	}
 
-	if err := s.svc.CommandsUsers().CreateUsers(c.Request.Context(), user); err != nil {
+
+	if err := s.svc.CommandsUsers().CreateUsers(ctx, user); err != nil {
 		log.Println(err.Error())
 		if errors.Is(err, context.DeadlineExceeded) {
 			c.JSON(http.StatusRequestTimeout, gin.H{"message": errs.RequestTimeout})
@@ -130,7 +143,11 @@ func (s *HandlerUsers) Update(c *gin.Context) {
 		return
 	}
 
-	if err:= validation.ValidateCheckFields(c.Request.Context(), user);err != nil {
+
+	ctx, cancel := cntx.TimeoutLongContext(c.Request.Context())
+	defer cancel()
+
+	if err:= validation.ValidateCheckFields(ctx, user);err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": errs.InvalidValidation,
 			"error": err.Error(),
@@ -138,7 +155,7 @@ func (s *HandlerUsers) Update(c *gin.Context) {
 		return
 	}
 
-	if err := s.svc.CommandsUsers().UpdateUsers(c.Request.Context(), userID, user); err != nil {
+	if err := s.svc.CommandsUsers().UpdateUsers(ctx, userID, user); err != nil {
 		log.Println(err.Error())
 		if errors.Is(err, context.DeadlineExceeded) {
 			c.JSON(http.StatusRequestTimeout, gin.H{"message": errs.RequestTimeout})
@@ -173,7 +190,10 @@ func (s *HandlerUsers) Delete(c *gin.Context) {
 		return
 	}
 
-	if err := s.svc.CommandsUsers().DeleteUsers(c.Request.Context(), userID); err != nil {
+	ctx, cancel := cntx.TimeoutShortContext(c.Request.Context())
+	defer cancel()
+
+	if err := s.svc.CommandsUsers().DeleteUsers(ctx, userID); err != nil {
 		log.Println(err.Error())
 		if errors.Is(err, context.DeadlineExceeded) {
 			c.JSON(http.StatusRequestTimeout, gin.H{"message": errs.RequestTimeout})

@@ -10,6 +10,7 @@ import (
 	"github.com/Zyprush18/badmintonzz/internal/services/application"
 	"github.com/Zyprush18/badmintonzz/internal/services/domain"
 	"github.com/Zyprush18/badmintonzz/internal/services/interfaces/request"
+	"github.com/Zyprush18/badmintonzz/internal/shared/cntx"
 	"github.com/Zyprush18/badmintonzz/internal/shared/errs"
 	"github.com/Zyprush18/badmintonzz/internal/shared/validation"
 	"github.com/gin-gonic/gin"
@@ -26,7 +27,11 @@ func NewHandlerService(a application.ApplicationServices) *HandlerServices {
 }
 
 func (a *HandlerServices) Index(c *gin.Context)  {
-	data, err := a.app.QueriesServices().GetServices(c.Request.Context())
+	ctx, cancel := cntx.TimeoutLongContext(c.Request.Context())
+	defer cancel()
+
+
+	data, err := a.app.QueriesServices().GetServices(ctx)
 	if err != nil {
 		log.Println(err.Error())
 		if errors.Is(err, context.DeadlineExceeded) {
@@ -54,7 +59,10 @@ func (a *HandlerServices) Show(c *gin.Context) {
 		return
 	}
 
-	service, err := a.app.QueriesServices().GetServiceByID(c.Request.Context(),serviceID)
+	ctx, cancel := cntx.TimeoutShortContext(c.Request.Context())
+	defer cancel()
+
+	service, err := a.app.QueriesServices().GetServiceByID(ctx, serviceID)
 	if err != nil {
 		log.Println(err.Error())
 		if errors.Is(err, context.DeadlineExceeded) {
@@ -86,7 +94,10 @@ func (a *HandlerServices) Create(c *gin.Context) {
 		return
 	}
 
-	if err:= validation.ValidateCheckFields(c.Request.Context(), service);err != nil {
+	ctx, cancel := cntx.TimeoutLongContext(c.Request.Context())
+	defer cancel()
+
+	if err:= validation.ValidateCheckFields(ctx, service);err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": errs.InvalidValidation,
 			"errors": err.Error(),
@@ -95,7 +106,7 @@ func (a *HandlerServices) Create(c *gin.Context) {
 		return
 	}
 
-	if err := a.app.CommandsServices().CreateService(c.Request.Context(), service); err != nil {
+	if err := a.app.CommandsServices().CreateService(ctx, service); err != nil {
 		log.Println(err.Error())
 		if errors.Is(err, context.DeadlineExceeded) {
 			c.JSON(http.StatusRequestTimeout, gin.H{"message": errs.RequestTimeout})
@@ -126,7 +137,10 @@ func (a *HandlerServices) Update(c *gin.Context) {
 		return
 	}
 
-	if err:= validation.ValidateCheckFields(c.Request.Context(), service);err != nil {
+	ctx, cancel := cntx.TimeoutLongContext(c.Request.Context())
+	defer cancel()
+
+	if err:= validation.ValidateCheckFields(ctx, service);err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": errs.InvalidValidation,
 			"errors": err.Error(),
@@ -134,7 +148,7 @@ func (a *HandlerServices) Update(c *gin.Context) {
 		return
 	}
 
-	if err := a.app.CommandsServices().UpdateService(c.Request.Context(), serviceID, service); err != nil {
+	if err := a.app.CommandsServices().UpdateService(ctx, serviceID, service); err != nil {
 		log.Println(err.Error())
 		if errors.Is(err, context.DeadlineExceeded) {
 			c.JSON(http.StatusRequestTimeout, gin.H{"message": errs.RequestTimeout})
@@ -165,7 +179,10 @@ func (a *HandlerServices) Delete(c *gin.Context) {
 		return
 	}
 
-	if err := a.app.CommandsServices().DeleteService(c.Request.Context(), serviceID); err != nil {
+	ctx, cancel := cntx.TimeoutShortContext(c.Request.Context())
+	defer cancel()
+
+	if err := a.app.CommandsServices().DeleteService(ctx, serviceID); err != nil {
 		log.Println(err.Error())
 		if errors.Is(err, context.DeadlineExceeded) {
 			c.JSON(http.StatusRequestTimeout, gin.H{"message": errs.RequestTimeout})

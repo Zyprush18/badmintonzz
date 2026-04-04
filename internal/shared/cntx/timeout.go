@@ -6,11 +6,15 @@ import (
 )
 
 var (
-	DbShortTime int = 3
-	DbMediumTime int = 5
-	DBLongTime int = 10
+	DbShortTime time.Duration = 5 * time.Second
+	DBLongTime time.Duration = 10 * time.Second
 )
 
-func TimeOutContext(ctx context.Context, duration int) (context.Context, context.CancelFunc) {
-	return context.WithTimeout(ctx, time.Duration(duration) * time.Second)
+func TimeoutShortContext(ctx context.Context) (context.Context, context.CancelFunc) {
+	return context.WithTimeout(ctx, DbShortTime)
+}
+
+
+func TimeoutLongContext(ctx context.Context) (context.Context, context.CancelFunc) {
+	return context.WithTimeout(ctx, DBLongTime)
 }

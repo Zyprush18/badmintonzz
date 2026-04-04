@@ -4,6 +4,7 @@ import "database/sql"
 
 type Bookings struct {
 	ID int
+	Amount float32
 	Type_Payment string
 	Status string
 	User_id int
