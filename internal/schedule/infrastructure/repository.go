@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/Zyprush18/badmintonzz/internal/schedule/domain"
+	"github.com/Zyprush18/badmintonzz/internal/schedule/interfaces/request"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -11,6 +12,9 @@ import (
 type RepoSchedules interface {
 	GetSchedules(ctx context.Context) ([]domain.ScheduleServices, error)
 	GetSchedule(ctx context.Context, id int) (*domain.ScheduleServices, error)
+	CreateSchedule(ctx context.Context, schedule *request.ScheduleRequest) error
+	UpdateSchedule(ctx context.Context, schedule map[string]interface{}) error
+	DeleteSchedule(ctx context.Context, id int) error
 }
 
 
@@ -75,4 +79,35 @@ func (d *database) GetSchedule(ctx context.Context, id int) (*domain.ScheduleSer
 	}
 
 	return &schedule, nil
+}
+
+
+func (d *database) CreateSchedule(ctx context.Context, schedule *request.ScheduleRequest) error {
+	query := `
+		INSERT INTO schedules (date, time, duration, service_id)
+		VALUES (:date, :time, :duration, :service_id)
+	`
+	_, err := d.db.NamedExecContext(ctx, query, schedule)
+	return err
+}
+
+
+func (d *database) UpdateSchedule(ctx context.Context, schedule map[string]interface{}) error {
+	query := `
+		UPDATE schedules
+		SET date = :date, time = :time, duration = :duration, service_id = :service_id
+		WHERE id = :id
+	`
+	_, err := d.db.NamedExecContext(ctx, query, schedule)
+	return err
+}
+
+
+func (d *database) DeleteSchedule(ctx context.Context, id int) error {
+	query := `
+		DELETE FROM schedules
+		WHERE id = ?
+	`
+	_, err := d.db.ExecContext(ctx, query, id)
+	return err
 }

@@ -16,5 +16,7 @@ func RegisterSchedule(r *gin.RouterGroup, db *sqlx.DB)  {
 
 	r.GET("/", hndl_schedule.Index)
 	r.GET("/:id", hndl_schedule.Show)
-
+	r.POST("/", hndl_schedule.Create)
+	r.PUT("/:id", hndl_schedule.Update)
+	r.DELETE("/:id", hndl_schedule.Delete)
 }
