@@ -3,6 +3,7 @@ package errs
 import (
 	"context"
 	"database/sql"
+	"errors"
 )
 
 var (
@@ -12,4 +13,6 @@ var (
 	InvalidValidation string = "Invalid validation"
 	RequestTimeout string = "Request Timeout"
 	ContextTimeout error = context.DeadlineExceeded
+	NoAuthorizationHeader string = "Missing authorization header"
+	InvalidClaims error = errors.New("invalid claims")
 )
