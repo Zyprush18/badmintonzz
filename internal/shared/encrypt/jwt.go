@@ -22,22 +22,19 @@ func GenerateJWToken(user_id int, email string) (string, error) {
 
 
 func ParseJWToken(token string) (int, string, error) {
-	t, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
+	t, err := jwt.ParseWithClaims(token, &jwt.MapClaims{}, func(t *jwt.Token) (interface{}, error) {
 		return secretKey, nil
-	})
+	}, nil)
 	
 	if err != nil {
 		return 0, "", err
 	}
-	// if !t.Valid {
-	// 	return 0, "", fmt.Errorf("invalid token")
-	// }
 
 	claims, ok := t.Claims.(jwt.MapClaims)
 	if !ok {
 		return 0, "", errs.InvalidClaims
 	}
-	
+
 	user_id := int(claims["user_id"].(float64))
 	email := claims["email"].(string)
 	return user_id, email, nil
