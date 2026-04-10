@@ -6,4 +6,5 @@ type UserRequest struct {
 	Email string `db:"email" json:"email" validate:"required,email"`
 	Password string `db:"password" json:"password" validate:"required,min=6,max=12"`
 	Phone string `db:"no_hp" json:"phone" validate:"required,min=10,max=15"`
+	Role string `db:"role" json:"role" validate:"required,oneof=user admin"`
 }

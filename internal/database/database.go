@@ -34,6 +34,7 @@ func Connect_DB() (*sqlx.DB, error) {
 			email VARCHAR(255) UNIQUE NOT NULL,
 			password VARCHAR(255) NOT NULL,
 			no_hp VARCHAR(20) UNIQUE NOT NULL,
+			role ENUM('user', 'admin') NOT NULL,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
@@ -63,7 +64,7 @@ func Connect_DB() (*sqlx.DB, error) {
 		CREATE TABLE IF NOT EXISTS bookings (
 			id INT AUTO_INCREMENT PRIMARY KEY,
 			amount DECIMAL(10, 2) NOT NULL,
-			type_payment VARCHAR(255) NOT NULL,
+			type_payment VARCHAR(50) NOT NULL,
 			status ENUM('pending', 'confirmed', 'cancelled') NOT NULL,
 			description TEXT DEFAULT NULL,
 			user_id INT NOT NULL,

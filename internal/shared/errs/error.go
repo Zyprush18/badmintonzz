@@ -15,4 +15,5 @@ var (
 	ContextTimeout error = context.DeadlineExceeded
 	NoAuthorizationHeader string = "Missing authorization header"
 	InvalidClaims error = errors.New("invalid claims")
+	ForbiddenAccess string = "Forbidden access"
 )

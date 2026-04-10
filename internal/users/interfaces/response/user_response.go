@@ -8,6 +8,7 @@ type UserResponse struct {
 	Username string `json:"username"`
 	Email string `json:"email"`
 	No_Hp string `json:"phone"`
-	Created_at time.Time `json:"created_at"`
-	Updated_at time.Time `json:"updated_at"`
+	Role string `json:"role,omitempty"`
+	Created_at time.Time `json:"created_at,omitempty"`
+	Updated_at time.Time `json:"updated_at,omitempty"`
 }

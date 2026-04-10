@@ -44,21 +44,19 @@ func CheckAuthToken() gin.HandlerFunc {
 
 func CheckRole(role ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		user_role, exists := c.Get("role_id")
-		if !exists {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "Missing role information"})
-			c.Abort()
-			return
-		}
-		
+		// user_role:= c.GetString("role")
+		user_role:= "admin"
+
 		for _, r := range role {
 			if user_role == r {
+				c.Set("role", "admin") // hapus ketika sudah integrasikan login dan set role nya di middleware checkauth
+				c.Set("user_id", 1) // hapus ketika sudah integrasikan login dan set role nya di middleware checkauth
 				c.Next()
 				return
 			}
 		}
 
-		c.JSON(http.StatusForbidden, gin.H{"message": "Insufficient permissions"})
+		c.JSON(http.StatusForbidden, gin.H{"message": errs.ForbiddenAccess})
 		c.Abort()
 	}
 }
