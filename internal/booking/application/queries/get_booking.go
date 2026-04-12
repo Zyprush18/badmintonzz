@@ -6,7 +6,7 @@ import (
 	"github.com/Zyprush18/badmintonzz/internal/booking/domain"
 	"github.com/Zyprush18/badmintonzz/internal/booking/infrastructure"
 	booking "github.com/Zyprush18/badmintonzz/internal/booking/interfaces/response"
-	schedule "github.com/Zyprush18/badmintonzz/internal/schedule/interfaces/response"
+	payment "github.com/Zyprush18/badmintonzz/internal/payments/interfaces/response"
 	svc_domain "github.com/Zyprush18/badmintonzz/internal/services/domain"
 	user "github.com/Zyprush18/badmintonzz/internal/users/interfaces/response"
 )
@@ -74,22 +74,27 @@ func (r *repoBooking) ParseBookingSLice(data []domain.Bookings) []booking.Bookin
 func (r *repoBooking) ParseBooking(data *domain.Bookings) booking.BookingsResponse {
 	return booking.BookingsResponse{
 		ID:           data.ID_Booking,
-		Amount:       data.Amount,
+		Date: data.Date,
+		Start_Time: data.Start_Time,
+		End_Time: data.End_Time,
 		Type_Payment: data.Type_Payment,
-		Status:       data.Status,
+		Status_Booking:       data.Status,
+		Description: data.Description.String,
 		User_id:      data.User_id,
-		Schedule_id:  data.Schedule_id,
-		Schedule: schedule.Schedules{
-			ID:         data.Schedule_id,
-			Date:       data.Date_Schedule,
-			Time:       data.Time_Schedule,
-			Duration:   data.Duration_Schedule,
-			Service_id: data.Service_Id,
-			Services: svc_domain.Services{
-				ID:    data.Service_Id,
-				Name:  data.Name_Service,
-				Price: data.Price_Service,
-			},
+		Payment_id:  data.Payment_id,
+		Service_id: data.Service_id,
+		Payment: payment.PaymentResponse{
+			ID: data.Payment_id,
+			Amount: data.Amount,
+			Payment_Method: data.Payment_Method,
+			Payment_Status: data.Payment_Status,
+			Payment_Url: data.Payment_Url.String,
+			Transaction_id: data.Transaction_id.String,
+		},
+		Service: svc_domain.Services{
+			ID: data.Service_id,
+			Name: data.Name_Service,
+			Price: data.Price_Service,
 		},
 		User: user.UserResponse{
 			ID:       data.User_id,

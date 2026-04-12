@@ -37,7 +37,6 @@ func Connect_DB() (*sqlx.DB, error) {
 			role ENUM('user', 'admin') NOT NULL,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
 			CONSTRAINT uk_users_email_phone UNIQUE (email, no_hp)
 		);
 
@@ -49,43 +48,45 @@ func Connect_DB() (*sqlx.DB, error) {
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 		);
 
-		CREATE TABLE IF NOT EXISTS schedules (
+		CREATE TABLE IF NOT EXISTS payments (
 			id INT AUTO_INCREMENT PRIMARY KEY,
-			service_id INT NOT NULL,
-			date DATE NOT NULL,
-			time TIME NOT NULL,
-			duration INT NOT NULL,
-			FOREIGN KEY (service_id) REFERENCES services(id),
+			amount DECIMAL(10, 2) NOT NULL,
+			payment_method VARCHAR(255) NOT NULL,
+			payment_status ENUM('pending', 'completed', 'failed', 'refunded', 'expired') NOT NULL,
+			payment_url TEXT NOT NULL,
+			transaction_id TEXT DEFAULT NULL,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP	
+			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+		);
+
+		CREATE TABLE IF NOT EXISTS bussiness_hour (
+			id int AUTO_INCREMENT PRIMARY KEY,
+			day VARCHAR(50) NOT NULL,
+			start_time TIME,
+			end_time TIME,
+			is_open BOOL NOT NULL DEFAULT FALSE,
+			description TEXT,
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 		);
 
 
 		CREATE TABLE IF NOT EXISTS bookings (
 			id INT AUTO_INCREMENT PRIMARY KEY,
-			amount DECIMAL(10, 2) NOT NULL,
+			date DATE NOT NULL,
+			start_time TIME NOT NULL,
+			end_time TIME NOT NULL,
 			type_payment VARCHAR(50) NOT NULL,
-			status ENUM('pending', 'confirmed', 'cancelled') NOT NULL,
+			status_booking ENUM('pending', 'confirmed', 'cancelled') NOT NULL,
 			description TEXT DEFAULT NULL,
 			user_id INT NOT NULL,
-			schedule_id INT NOT NULL,
+			payments_id INT NOT NULL,
+			service_id INT NOT NULL,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			FOREIGN KEY (user_id) REFERENCES users(id),
-			FOREIGN KEY (schedule_id) REFERENCES schedules(id)
-		);
-
-		CREATE TABLE IF NOT EXISTS payments (
-			id INT AUTO_INCREMENT PRIMARY KEY,
-			booking_id INT NOT NULL,
-			amount DECIMAL(10, 2) NOT NULL,
-			payment_method VARCHAR(255) NOT NULL,
-			payment_status ENUM('pending', 'completed', 'failed') NOT NULL,
-			payment_url TEXT DEFAULT NULL,
-			transaction_id VARCHAR(255) DEFAULT NULL,
-			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			FOREIGN KEY (booking_id) REFERENCES bookings(id)
+			FOREIGN KEY (payments_id) REFERENCES payments(id),
+			FOREIGN KEY (service_id) REFERENCES services(id)
 		);
 `
 

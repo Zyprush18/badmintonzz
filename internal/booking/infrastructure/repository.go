@@ -29,28 +29,33 @@ func (d *database) GetBookings(ctx context.Context) ([]domain.Bookings, error) {
 	query := `
 		SELECT
 			b.id as booking_id,
-			b.amount,
+			b.date,
+			b.start_time,
+			b.end_time,
 			b.type_payment,
-			b.status,
-			b.user_id,
-			b.schedule_id,
+			b.status_booking,
 			b.created_at as created_at_booking,
 			b.updated_at as updated_at_booking,
-			s.id as schedule_id,
-			s.date as date_schedule,
-			s.time as time_schedule,
-			s.duration as duration_schedule,
-			s.service_id,
+
+			p.id as payments_id,
+			p.amount,
+			p.payment_method,
+			p.payment_status,
+			p.payment_url,
+			p.transaction_id,
+			
+			svc.id as service_id,
 			svc.name as name_service,
 			svc.price as price_service,
+
 			u.id as user_id,
 			u.username,
 			u.email,
 			u.no_hp as phone
 		FROM bookings as b
-		LEFT JOIN schedules as s ON b.schedule_id = s.id
+		LEFT JOIN payments as p ON b.payments_id = p.id
 		LEFT JOIN users as u ON b.user_id = u.id
-		LEFT JOIN services as svc ON s.service_id = svc.id;
+		LEFT JOIN services as svc ON b.service_id = svc.id;
 	`
 
 	if err := d.db.SelectContext(ctx, &bookings, query); err != nil {
@@ -60,34 +65,38 @@ func (d *database) GetBookings(ctx context.Context) ([]domain.Bookings, error) {
 	return bookings, nil
 }
 
-     
 func (d *database) GetBooking(ctx context.Context, id int) (*domain.Bookings, error) {
 	var booking domain.Bookings
 	query := `
 		SELECT
 			b.id as booking_id,
-			b.amount,
+			b.date,
+			b.start_time,
+			b.end_time,
 			b.type_payment,
-			b.status,
-			b.user_id,
-			b.schedule_id,
+			b.status_booking,
 			b.created_at as created_at_booking,
 			b.updated_at as updated_at_booking,
-			s.id as schedule_id,
-			s.date as date_schedule,
-			s.time as time_schedule,
-			s.duration as duration_schedule,
-			s.service_id,
+
+			p.id as payments_id,
+			p.amount,
+			p.payment_method,
+			p.payment_status,
+			p.payment_url,
+			p.transaction_id,
+			
+			svc.id as service_id,
 			svc.name as name_service,
 			svc.price as price_service,
+
 			u.id as user_id,
 			u.username,
 			u.email,
 			u.no_hp as phone
 		FROM bookings as b
-		LEFT JOIN schedules as s ON b.schedule_id = s.id
+		LEFT JOIN payments as p ON b.payments_id = p.id
 		LEFT JOIN users as u ON b.user_id = u.id
-		LEFT JOIN services as svc ON s.service_id = svc.id
+		LEFT JOIN services as svc ON b.service_id = svc.id
 		WHERE b.id = ?
 	`
 	if err := d.db.GetContext(ctx, &booking, query, id); err != nil {
@@ -97,34 +106,38 @@ func (d *database) GetBooking(ctx context.Context, id int) (*domain.Bookings, er
 	return &booking, nil
 }
 
-
 func (d *database) GetBookingsByUserID(ctx context.Context, userID int) ([]domain.Bookings, error) {
 	var bookings []domain.Bookings
 	query := `
 		SELECT
 			b.id as booking_id,
-			b.amount,
+			b.date,
+			b.start_time,
+			b.end_time,
 			b.type_payment,
-			b.status,
-			b.user_id,
-			b.schedule_id,
+			b.status_booking,
 			b.created_at as created_at_booking,
 			b.updated_at as updated_at_booking,
-			s.id as schedule_id,
-			s.date as date_schedule,
-			s.time as time_schedule,
-			s.duration as duration_schedule,
-			s.service_id,
+
+			p.id as payments_id,
+			p.amount,
+			p.payment_method,
+			p.payment_status,
+			p.payment_url,
+			p.transaction_id,
+			
+			svc.id as service_id,
 			svc.name as name_service,
 			svc.price as price_service,
+
 			u.id as user_id,
 			u.username,
 			u.email,
 			u.no_hp as phone
 		FROM bookings as b
-		LEFT JOIN schedules as s ON b.schedule_id = s.id
+		LEFT JOIN payments as p ON b.payments_id = p.id
 		LEFT JOIN users as u ON b.user_id = u.id
-		LEFT JOIN services as svc ON s.service_id = svc.id
+		LEFT JOIN services as svc ON b.service_id = svc.id
 		WHERE b.user_id = ?
 	`
 
@@ -140,28 +153,33 @@ func (d *database) GetBookingByUserIdAndId(ctx context.Context, userId int, book
 	query := `
 		SELECT
 			b.id as booking_id,
-			b.amount,
+			b.date,
+			b.start_time,
+			b.end_time,
 			b.type_payment,
-			b.status,
-			b.user_id,
-			b.schedule_id,
+			b.status_booking,
 			b.created_at as created_at_booking,
 			b.updated_at as updated_at_booking,
-			s.id as schedule_id,
-			s.date as date_schedule,
-			s.time as time_schedule,
-			s.duration as duration_schedule,
-			s.service_id,
+
+			p.id as payments_id,
+			p.amount,
+			p.payment_method,
+			p.payment_status,
+			p.payment_url,
+			p.transaction_id,
+			
+			svc.id as service_id,
 			svc.name as name_service,
 			svc.price as price_service,
+
 			u.id as user_id,
 			u.username,
 			u.email,
 			u.no_hp as phone
 		FROM bookings as b
-		LEFT JOIN schedules as s ON b.schedule_id = s.id
+		LEFT JOIN payments as p ON b.payments_id = p.id
 		LEFT JOIN users as u ON b.user_id = u.id
-		LEFT JOIN services as svc ON s.service_id = svc.id
+		LEFT JOIN services as svc ON b.service_id = svc.id
 		WHERE b.user_id = ? AND b.id = ?
 	`
 	if err := d.db.GetContext(ctx, &booking, query, userId, bookingId); err != nil {
@@ -170,7 +188,6 @@ func (d *database) GetBookingByUserIdAndId(ctx context.Context, userId int, book
 
 	return &booking, nil
 }
-
 
 func (d *database) CreateBooking(ctx context.Context, booking *request.BookingRequest) error {
 	query := `
