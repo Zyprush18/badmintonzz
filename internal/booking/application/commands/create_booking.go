@@ -2,6 +2,7 @@ package commands
 
 import (
 	"context"
+	"log"
 
 	"github.com/Zyprush18/badmintonzz/internal/booking/infrastructure"
 	"github.com/Zyprush18/badmintonzz/internal/booking/interfaces/request"
@@ -24,5 +25,28 @@ func (r *repoBooking) CreateBooking(ctx context.Context, booking *request.Bookin
 	if role != "admin" {
 		booking.User_id = user_id
 	}
-	return r.repo.CreateBooking(ctx, booking)
+
+	data_svc, err := r.repo.GetPriceServices(ctx, booking.Service_id)
+	if err != nil {
+		return err
+	}
+
+	booking.Name_svc = data_svc.Name
+
+	booking.Amount = float32(booking.Hour) * data_svc.Price
+
+	mid := NewMidtrans(booking)
+
+	get_Midt, err := mid.SnapRequest()
+	if err != nil {
+		return err
+	}
+
+
+	log.Println(get_Midt)
+
+
+
+	// return r.repo.CreateBooking(ctx, booking)
+	return nil
 }

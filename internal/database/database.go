@@ -19,14 +19,11 @@ func Connect_DB() (*sqlx.DB, error) {
 		return nil, err
 	}
 
-	// defer db.Close()
-
 
 	if err:= db.Ping();err != nil {
 		return nil, err
 	}
 
-	// schema
 	schema := `
 		CREATE TABLE IF NOT EXISTS users (
 			id INT AUTO_INCREMENT PRIMARY KEY,
@@ -62,8 +59,8 @@ func Connect_DB() (*sqlx.DB, error) {
 		CREATE TABLE IF NOT EXISTS bussiness_hour (
 			id int AUTO_INCREMENT PRIMARY KEY,
 			day VARCHAR(50) NOT NULL,
-			start_time TIME,
-			end_time TIME,
+			open_time TIME,
+			close_time TIME,
 			is_open BOOL NOT NULL DEFAULT FALSE,
 			description TEXT,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -90,8 +87,6 @@ func Connect_DB() (*sqlx.DB, error) {
 		);
 `
 
-
-	// migrate table to database
 	result := db.MustExec(schema)
 	if result == nil {
 		return nil, errors.New("Failed Migrate Tables")	

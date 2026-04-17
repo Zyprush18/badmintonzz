@@ -14,6 +14,7 @@ type RepoBooking interface {
 	GetBookingsByUserID(ctx context.Context, userID int) ([]domain.Bookings, error)
 	GetBookingByUserIdAndId(ctx context.Context, userId int, bookingId int) (*domain.Bookings, error)
 	CreateBooking(ctx context.Context, booking *request.BookingRequest) error
+	GetPriceServices(ctx context.Context, serviceID int) (*domain.GetService, error)
 }
 
 type database struct {
@@ -191,6 +192,17 @@ func (d *database) GetBookingByUserIdAndId(ctx context.Context, userId int, book
 
 func (d *database) CreateBooking(ctx context.Context, booking *request.BookingRequest) error {
 	query := `
+	BEGIN TRANSACTION;
+		SELECT * 
+
+		INSERT INTO payments (amount, type_payment, status, user_id, schedule_id, created_at, updated_at)
+		VALUES (:amount, :type_payment, :status, :user_id, :schedule_id, :created_at, :updated_at);
+
+		INSERT INTO bookings (date, start_time, end_time, type_payment, status_booking, description,user_id, service_id, created_at, updated_at)
+		VALUES (:date, :start_time, :end_time, :type_payment, :status_booking, :description, :user_id, :service_id, :created_at, :updated_at)
+	COMMIT;
+
+
 		INSERT INTO bookings (amount, type_payment, status, user_id, schedule_id, created_at, updated_at)
 		VALUES (:amount, :type_payment, :status, :user_id, :schedule_id, :updated_at)
 	`
@@ -200,4 +212,15 @@ func (d *database) CreateBooking(ctx context.Context, booking *request.BookingRe
 	}
 
 	return nil
+}
+
+func (d *database) GetPriceServices(ctx context.Context, serviceID int) (*domain.GetService, error) {
+	var data domain.GetService
+	query := `
+		SELECT name,price FROM services WHERE id = ?
+	`
+	if err := d.db.GetContext(ctx, &data, query, serviceID); err != nil {
+		return nil, err
+	}
+	return &data, nil
 }

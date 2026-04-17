@@ -35,3 +35,9 @@ type Bookings struct {
 	No_Hp string `db:"phone"`
 
 }
+
+
+type GetService struct {
+	Name string `db:"name"`
+	Price float32 `db:"price"`
+}
