@@ -14,4 +14,7 @@ func RegisterRoute(r *gin.RouterGroup, db *sqlx.DB)  {
 
 	booking := r.Group("/bookings")
 	RegisterRouteBooking(booking, db)
+
+	payments := r.Group("/payments")
+	RegisterRoutePayments(payments, db)
 }

@@ -33,7 +33,7 @@ func (r *repoBooking) CreateBooking(ctx context.Context, booking *request.Bookin
 
 	booking.Name_svc = data_svc.Name
 
-	booking.Amount = float32(booking.Hour) * data_svc.Price
+	booking.Amount = data_svc.Price
 
 	mid := NewMidtrans(booking)
 
