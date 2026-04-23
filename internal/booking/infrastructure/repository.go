@@ -193,18 +193,15 @@ func (d *database) GetBookingByUserIdAndId(ctx context.Context, userId int, book
 func (d *database) CreateBooking(ctx context.Context, booking *request.BookingRequest) error {
 	query := `
 	BEGIN TRANSACTION;
-		SELECT * 
+		DECLARE @countBussHour INT; 
+		SELECT count(*) INTO @countBussHour FROM bussiness_hour WHERE day = :day AND start_time <= :start_time AND end_time >= :end_time AND is_open = TRUE;
+		
+		INSERT INTO payments (order_id, amount, type_payment, paymennt_url, created_at)
+		VALUES (:order_id, :amount, :type_payment, :status, :created_at_payment) WHERE @countBussHour > 0;
 
-		INSERT INTO payments (amount, type_payment, status, user_id, schedule_id, created_at, updated_at)
-		VALUES (:amount, :type_payment, :status, :user_id, :schedule_id, :created_at, :updated_at);
-
-		INSERT INTO bookings (date, start_time, end_time, type_payment, status_booking, description,user_id, service_id, created_at, updated_at)
-		VALUES (:date, :start_time, :end_time, :type_payment, :status_booking, :description, :user_id, :service_id, :created_at, :updated_at)
+		INSERT INTO bookings (date, start_time, end_time, status_booking, description, user_id, service_id, payment_id, created_at)
+		VALUES (:date, :start_time, :end_time, :status_booking, :description, :user_id, :service_id, LAST_INSERT_ID(),:created_at_booking) WHERE @countBussHour > 0;
 	COMMIT;
-
-
-		INSERT INTO bookings (amount, type_payment, status, user_id, schedule_id, created_at, updated_at)
-		VALUES (:amount, :type_payment, :status, :user_id, :schedule_id, :updated_at)
 	`
 	_, err := d.db.ExecContext(ctx, query, booking)
 	if err != nil {

@@ -47,6 +47,7 @@ func Connect_DB() (*sqlx.DB, error) {
 
 		CREATE TABLE IF NOT EXISTS payments (
 			id INT AUTO_INCREMENT PRIMARY KEY,
+			order_id TEXT NOT NULL,
 			amount DECIMAL(10, 2) NOT NULL,
 			payment_method VARCHAR(255) NOT NULL,
 			payment_status ENUM('pending', 'completed', 'failed', 'refunded', 'expired') NOT NULL,
@@ -59,8 +60,8 @@ func Connect_DB() (*sqlx.DB, error) {
 		CREATE TABLE IF NOT EXISTS bussiness_hour (
 			id int AUTO_INCREMENT PRIMARY KEY,
 			day VARCHAR(50) NOT NULL,
-			open_time TIME,
-			close_time TIME,
+			start_time TIME,
+			end_time TIME,
 			is_open BOOL NOT NULL DEFAULT FALSE,
 			description TEXT,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -73,7 +74,6 @@ func Connect_DB() (*sqlx.DB, error) {
 			date DATE NOT NULL,
 			start_time TIME NOT NULL,
 			end_time TIME NOT NULL,
-			type_payment VARCHAR(50) NOT NULL,
 			status_booking ENUM('pending', 'confirmed', 'cancelled') NOT NULL,
 			description TEXT DEFAULT NULL,
 			user_id INT NOT NULL,

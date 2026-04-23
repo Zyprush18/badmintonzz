@@ -43,10 +43,9 @@ func (r *repoBooking) CreateBooking(ctx context.Context, booking *request.Bookin
 	}
 
 
+
 	log.Println(get_Midt)
 
 
-
-	// return r.repo.CreateBooking(ctx, booking)
 	return nil
 }
