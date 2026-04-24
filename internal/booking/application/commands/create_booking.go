@@ -2,14 +2,16 @@ package commands
 
 import (
 	"context"
-	"log"
+	"crypto/rand"
+	"strconv"
+	"time"
 
 	"github.com/Zyprush18/badmintonzz/internal/booking/infrastructure"
 	"github.com/Zyprush18/badmintonzz/internal/booking/interfaces/request"
 )
 
 type CommandBooking interface {
-	CreateBooking(ctx context.Context, booking *request.BookingRequest, user_id int, role string) error
+	CreateBooking(ctx context.Context, booking *request.BookingRequest, user_id int, role string) (string, string, error)
 }
 
 type repoBooking struct {
@@ -21,31 +23,57 @@ func NewCommandsBooking(r infrastructure.RepoBooking) CommandBooking {
 }
 
 
-func (r *repoBooking) CreateBooking(ctx context.Context, booking *request.BookingRequest, user_id int, role string) error {
-	if role != "admin" {
-		booking.User_id = user_id
-	}
-
+func (r *repoBooking) CreateBooking(ctx context.Context, booking *request.BookingRequest, user_id int, role string) (string, string,error) { 	
 	data_svc, err := r.repo.GetPriceServices(ctx, booking.Service_id)
 	if err != nil {
-		return err
+		return "", "", err
 	}
 
 	booking.Name_svc = data_svc.Name
 
-	booking.Amount = data_svc.Price
+	booking.Price = data_svc.Price
+
+	booking.Order_Id = "badmintonzz-" + strconv.Itoa(booking.Service_id) + "-" + rand.Text()
 
 	mid := NewMidtrans(booking)
 
 	get_Midt, err := mid.SnapRequest()
 	if err != nil {
-		return err
+		return "", "", err
+	}
+
+	time_app := time.Now()
+
+	start_time, err := time.Parse("15:04:05", booking.Start_Time)
+	if err != nil {
+		return "", "", err
+	}
+	end_time := start_time.Add(time.Duration(booking.Hour) * time.Hour)
+	
+
+	bookingPayment := &request.BookingPaymentRequest{
+		Day: time_app.Weekday().String(),
+		Start_Time: start_time,
+		End_Time: end_time,
+
+		Order_ID: booking.Order_Id,
+		Amount: booking.Price * float32(booking.Hour),
+		Payment_Url: get_Midt.RedirectURL,
+		Created_At_Payment: time_app,
+	
+		Date: time_app.Format(time.DateOnly),
+		Start_Time_Booking: start_time,
+		End_Time_Booking: end_time,
+		Status_Booking: "pending",
+		Users_Id: user_id,
+		Service_Id: booking.Service_id,
+		Created_At_Booking: time_app,
+	}
+
+	if err:= r.repo.CreateBooking(ctx,bookingPayment);err != nil {
+		return "", "", err
 	}
 
 
-
-	log.Println(get_Midt)
-
-
-	return nil
+	return get_Midt.Token, get_Midt.RedirectURL, nil
 }

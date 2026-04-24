@@ -111,7 +111,7 @@ func (s *handlerBooking) Create(c *gin.Context) {
 	user_id := c.GetInt("user_id")
 	
 
-	err := s.svc.CommandsBooking().CreateBooking(ctx, booking, user_id, role)
+	token, redirectURL, err := s.svc.CommandsBooking().CreateBooking(ctx, booking, user_id, role)
 	if err != nil {
 		log.Println(err.Error())
 		if errors.Is(err, errs.ContextTimeout) {
@@ -125,5 +125,7 @@ func (s *handlerBooking) Create(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "Booking created successfully",
+		"token": token,
+		"redirect_url": redirectURL,
 	})
 }

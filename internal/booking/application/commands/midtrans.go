@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"crypto/rand"
 	"os"
 	"strconv"
 
@@ -33,13 +32,11 @@ func NewMidtrans(req *request.BookingRequest) *midtransStruct {
 
 
 func (m *midtransStruct) SnapRequest() (*snap.Response, error) {
-	amount := int64(m.requestData.Amount) * int64(m.requestData.Hour)
-
-	order_id := "badmintonzz-" + strconv.Itoa(m.requestData.Service_id) + "-" + rand.Text()
+	amount := int64(m.requestData.Price) * int64(m.requestData.Hour)
 
 	req := &snap.Request{
 		TransactionDetails: midtrans.TransactionDetails{
-			OrderID: order_id,
+			OrderID: m.requestData.Order_Id,
 			GrossAmt: amount,
 		},
 		CreditCard: &snap.CreditCardDetails{
@@ -53,7 +50,7 @@ func (m *midtransStruct) SnapRequest() (*snap.Response, error) {
 			{
 				ID: strconv.Itoa(m.requestData.Service_id),
 				Name: m.requestData.Name_svc,
-				Price: int64(m.requestData.Amount),
+				Price: int64(m.requestData.Price),
 				Qty: int32(m.requestData.Hour),
 			},
 		},

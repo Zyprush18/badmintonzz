@@ -13,7 +13,7 @@ type RepoBooking interface {
 	GetBooking(ctx context.Context, id int) (*domain.Bookings, error)
 	GetBookingsByUserID(ctx context.Context, userID int) ([]domain.Bookings, error)
 	GetBookingByUserIdAndId(ctx context.Context, userId int, bookingId int) (*domain.Bookings, error)
-	CreateBooking(ctx context.Context, booking *request.BookingRequest) error
+	CreateBooking(ctx context.Context, booking *request.BookingPaymentRequest) error
 	GetPriceServices(ctx context.Context, serviceID int) (*domain.GetService, error)
 }
 
@@ -190,17 +190,17 @@ func (d *database) GetBookingByUserIdAndId(ctx context.Context, userId int, book
 	return &booking, nil
 }
 
-func (d *database) CreateBooking(ctx context.Context, booking *request.BookingRequest) error {
+func (d *database) CreateBooking(ctx context.Context, booking *request.BookingPaymentRequest) error {
 	query := `
 	BEGIN TRANSACTION;
 		DECLARE @countBussHour INT; 
 		SELECT count(*) INTO @countBussHour FROM bussiness_hour WHERE day = :day AND start_time <= :start_time AND end_time >= :end_time AND is_open = TRUE;
 		
-		INSERT INTO payments (order_id, amount, type_payment, paymennt_url, created_at)
-		VALUES (:order_id, :amount, :type_payment, :status, :created_at_payment) WHERE @countBussHour > 0;
+		INSERT INTO payments (order_id, amount, paymennt_url, created_at)
+		VALUES (:order_id, :amount, :payment_url, :created_at_payment) WHERE @countBussHour > 0;
 
-		INSERT INTO bookings (date, start_time, end_time, status_booking, description, user_id, service_id, payment_id, created_at)
-		VALUES (:date, :start_time, :end_time, :status_booking, :description, :user_id, :service_id, LAST_INSERT_ID(),:created_at_booking) WHERE @countBussHour > 0;
+		INSERT INTO bookings (date, start_time, end_time, status_booking, user_id, service_id, payment_id, created_at)
+		VALUES (:date, :start_time_booking, :end_time_booking, :status_booking, :user_id, :service_id, LAST_INSERT_ID(), :created_at_booking) WHERE @countBussHour > 0;
 	COMMIT;
 	`
 	_, err := d.db.ExecContext(ctx, query, booking)
