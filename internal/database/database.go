@@ -49,7 +49,7 @@ func Connect_DB() (*sqlx.DB, error) {
 			id INT AUTO_INCREMENT PRIMARY KEY,
 			order_id TEXT NOT NULL,
 			amount DECIMAL(10, 2) NOT NULL,
-			payment_method VARCHAR(255) NOT NULL,
+			payment_method VARCHAR(255),
 			payment_status ENUM('pending', 'completed', 'failed', 'refunded', 'expired') NOT NULL,
 			payment_url TEXT NOT NULL,
 			transaction_id TEXT DEFAULT NULL,

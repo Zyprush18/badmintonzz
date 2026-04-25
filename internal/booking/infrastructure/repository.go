@@ -2,6 +2,9 @@ package infrastructure
 
 import (
 	"context"
+	"database/sql"
+	"errors"
+	"log"
 
 	"github.com/Zyprush18/badmintonzz/internal/booking/domain"
 	"github.com/Zyprush18/badmintonzz/internal/booking/interfaces/request"
@@ -191,24 +194,54 @@ func (d *database) GetBookingByUserIdAndId(ctx context.Context, userId int, book
 }
 
 func (d *database) CreateBooking(ctx context.Context, booking *request.BookingPaymentRequest) error {
-	query := `
-	BEGIN TRANSACTION;
-		DECLARE @countBussHour INT; 
-		SELECT count(*) INTO @countBussHour FROM bussiness_hour WHERE day = :day AND start_time <= :start_time AND end_time >= :end_time AND is_open = TRUE;
-		
-		INSERT INTO payments (order_id, amount, paymennt_url, created_at)
-		VALUES (:order_id, :amount, :payment_url, :created_at_payment) WHERE @countBussHour > 0;
-
-		INSERT INTO bookings (date, start_time, end_time, status_booking, user_id, service_id, payment_id, created_at)
-		VALUES (:date, :start_time_booking, :end_time_booking, :status_booking, :user_id, :service_id, LAST_INSERT_ID(), :created_at_booking) WHERE @countBussHour > 0;
-	COMMIT;
-	`
-	_, err := d.db.ExecContext(ctx, query, booking)
+	tx, err := d.db.BeginTxx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return err
 	}
 
-	return nil
+	defer func ()  {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	var result_count_BussHour int
+
+	query_cek_bussHour := `SELECT count(*) FROM bussiness_hour WHERE day=? AND start_time <= ? AND end_time >= ? AND is_open = TRUE;`
+
+	if err:= tx.QueryRowContext(ctx, query_cek_bussHour, booking.Day, booking.Start_Time, booking.End_Time).Scan(&result_count_BussHour);err != nil {
+		return err
+	}
+
+	if result_count_BussHour < 1 {
+		log.Println("error di sini brother: " + err.Error())
+		return errors.New("failed")
+	}
+
+	query_insert_payments := `
+		INSERT INTO payments (order_id, amount, payment_url, created_at)
+		VALUES (:order_id, :amount, :payment_url, :created_at_payment);
+	`
+
+	paymets, err := tx.NamedExecContext(ctx, query_insert_payments, booking)
+	if err != nil {
+		return err
+	}
+
+	payment_id, err := paymets.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	booking.Payment_ID = int(payment_id)
+	query_insert_booking := `INSERT INTO bookings (date, start_time, end_time, status_booking, user_id, service_id, payments_id, created_at)
+		VALUES (:date, :start_time_booking, :end_time_booking, :status_booking, :user_id, :service_id, :payment_id, :created_at_booking);`
+	
+	if _, err := tx.NamedExecContext(ctx, query_insert_booking, booking);err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 func (d *database) GetPriceServices(ctx context.Context, serviceID int) (*domain.GetService, error) {

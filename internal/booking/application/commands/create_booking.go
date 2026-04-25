@@ -50,11 +50,11 @@ func (r *repoBooking) CreateBooking(ctx context.Context, booking *request.Bookin
 	}
 	end_time := start_time.Add(time.Duration(booking.Hour) * time.Hour)
 	
-
+	day := time_app.Weekday().String()
 	bookingPayment := &request.BookingPaymentRequest{
-		Day: time_app.Weekday().String(),
-		Start_Time: start_time,
-		End_Time: end_time,
+		Day: day,
+		Start_Time: start_time.Format(time.TimeOnly),
+		End_Time: end_time.Format(time.TimeOnly),
 
 		Order_ID: booking.Order_Id,
 		Amount: booking.Price * float32(booking.Hour),
@@ -62,8 +62,8 @@ func (r *repoBooking) CreateBooking(ctx context.Context, booking *request.Bookin
 		Created_At_Payment: time_app,
 	
 		Date: time_app.Format(time.DateOnly),
-		Start_Time_Booking: start_time,
-		End_Time_Booking: end_time,
+		Start_Time_Booking: start_time.Format(time.TimeOnly),
+		End_Time_Booking: end_time.Format(time.TimeOnly),
 		Status_Booking: "pending",
 		Users_Id: user_id,
 		Service_Id: booking.Service_id,

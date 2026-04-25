@@ -52,6 +52,7 @@ func (m *midtransStruct) SnapRequest() (*snap.Response, error) {
 				Name: m.requestData.Name_svc,
 				Price: int64(m.requestData.Price),
 				Qty: int32(m.requestData.Hour),
+				Category: "Booking",
 			},
 		},
 	}

@@ -14,8 +14,8 @@ type BookingRequest struct {
 
 type BookingPaymentRequest struct {
 	Day string `db:"day"`
-	Start_Time time.Time `db:"start_time"`
-	End_Time time.Time `db:"end_time"`
+	Start_Time string `db:"start_time"`
+	End_Time string `db:"end_time"`
 	
 	Order_ID string `db:"order_id"`
 	Amount float32 `db:"amount"`
@@ -23,10 +23,11 @@ type BookingPaymentRequest struct {
 	Created_At_Payment time.Time `db:"created_at_payment"`
 	
 	Date string `db:"date"`
-	Start_Time_Booking time.Time `db:"start_time_booking"`
-	End_Time_Booking time.Time `db:"end_time_booking"`
+	Start_Time_Booking string `db:"start_time_booking"`
+	End_Time_Booking string `db:"end_time_booking"`
 	Status_Booking string `db:"status_booking"`
 	Users_Id int `db:"user_id"`
 	Service_Id int `db:"service_id"`
+	Payment_ID int `db:"payment_id"`
 	Created_At_Booking time.Time `db:"created_at_booking"`
 }
