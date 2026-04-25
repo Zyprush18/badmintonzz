@@ -93,7 +93,7 @@ func (s *handlerBooking) Create(c *gin.Context) {
 
 	booking := new(request.BookingRequest)
 	if err := c.ShouldBindJSON(booking); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid booking data"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid body booking request"})
 		return
 	}
 
@@ -128,4 +128,84 @@ func (s *handlerBooking) Create(c *gin.Context) {
 		"token": token,
 		"redirect_url": redirectURL,
 	})
+}
+
+
+func (s *handlerBooking) Update(c *gin.Context)  {
+	ctx, cancel := cntx.TimeoutLongContext(c.Request.Context())
+	defer cancel()
+
+
+	req := new(request.BookingUpdateRequest)
+	if err:= c.ShouldBindJSON(req);err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid body booking request"})
+		return
+	}
+
+
+	if err:= validation.ValidateCheckFields(ctx, req);err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": errs.InvalidValidation,
+			"errors": err.Error(),
+		})
+		return
+	}
+
+
+	booking_id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid Booking ID",
+		})
+		return
+	}
+
+
+	if err:= s.svc.CommandsBooking().UpdateBooking(ctx, booking_id, req);err != nil {
+		log.Println(err.Error())
+
+		if errors.Is(err, errs.ContextTimeout) {
+			c.JSON(http.StatusGatewayTimeout, gin.H{"message": errs.RequestTimeout})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{"message": errs.ServerError})
+		return
+	}
+
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Update Successfully",
+	})
+}
+
+
+func (s *handlerBooking) Delete(c *gin.Context) {
+	ctx, cancel := cntx.TimeoutShortContext(c.Request.Context())
+	defer cancel()	
+
+	booking_id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid Booking ID",
+		})
+		return
+	}
+
+	if err:= s.svc.CommandsBooking().DeleteBooking(ctx, booking_id);err != nil {
+		log.Println(err.Error())
+
+		if errors.Is(err, errs.ContextTimeout) {
+			c.JSON(http.StatusGatewayTimeout, gin.H{"message": errs.RequestTimeout})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{"message": errs.ServerError})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Delete Successfully",
+	})
+
 }

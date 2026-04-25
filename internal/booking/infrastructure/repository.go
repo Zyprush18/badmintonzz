@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"log"
+	"time"
 
 	"github.com/Zyprush18/badmintonzz/internal/booking/domain"
 	"github.com/Zyprush18/badmintonzz/internal/booking/interfaces/request"
@@ -18,6 +19,8 @@ type RepoBooking interface {
 	GetBookingByUserIdAndId(ctx context.Context, userId int, bookingId int) (*domain.Bookings, error)
 	CreateBooking(ctx context.Context, booking *request.BookingPaymentRequest) error
 	GetPriceServices(ctx context.Context, serviceID int) (*domain.GetService, error)
+	Update(ctx context.Context, req *request.BookingUpdateRequest) error
+	Delete(ctx context.Context, booking_id int, deleted_at time.Time) error
 }
 
 type database struct {
@@ -59,7 +62,8 @@ func (d *database) GetBookings(ctx context.Context) ([]domain.Bookings, error) {
 		FROM bookings as b
 		LEFT JOIN payments as p ON b.payments_id = p.id
 		LEFT JOIN users as u ON b.user_id = u.id
-		LEFT JOIN services as svc ON b.service_id = svc.id;
+		LEFT JOIN services as svc ON b.service_id = svc.id
+		WHERE b.deleted_at IS NULL;
 	`
 
 	if err := d.db.SelectContext(ctx, &bookings, query); err != nil {
@@ -101,7 +105,7 @@ func (d *database) GetBooking(ctx context.Context, id int) (*domain.Bookings, er
 		LEFT JOIN payments as p ON b.payments_id = p.id
 		LEFT JOIN users as u ON b.user_id = u.id
 		LEFT JOIN services as svc ON b.service_id = svc.id
-		WHERE b.id = ?
+		WHERE b.id = ? AND b.deleted_at IS NULL;
 	`
 	if err := d.db.GetContext(ctx, &booking, query, id); err != nil {
 		return nil, err
@@ -142,7 +146,7 @@ func (d *database) GetBookingsByUserID(ctx context.Context, userID int) ([]domai
 		LEFT JOIN payments as p ON b.payments_id = p.id
 		LEFT JOIN users as u ON b.user_id = u.id
 		LEFT JOIN services as svc ON b.service_id = svc.id
-		WHERE b.user_id = ?
+		WHERE b.user_id = ? AND b.deleted_at IS NULL;
 	`
 
 	if err := d.db.SelectContext(ctx, &bookings, query, userID); err != nil {
@@ -184,7 +188,7 @@ func (d *database) GetBookingByUserIdAndId(ctx context.Context, userId int, book
 		LEFT JOIN payments as p ON b.payments_id = p.id
 		LEFT JOIN users as u ON b.user_id = u.id
 		LEFT JOIN services as svc ON b.service_id = svc.id
-		WHERE b.user_id = ? AND b.id = ?
+		WHERE b.user_id = ? AND b.id = ? AND b.deleted_at IS NULL;
 	`
 	if err := d.db.GetContext(ctx, &booking, query, userId, bookingId); err != nil {
 		return nil, err
@@ -234,8 +238,8 @@ func (d *database) CreateBooking(ctx context.Context, booking *request.BookingPa
 	}
 
 	booking.Payment_ID = int(payment_id)
-	query_insert_booking := `INSERT INTO bookings (date, start_time, end_time, status_booking, user_id, service_id, payments_id, created_at)
-		VALUES (:date, :start_time_booking, :end_time_booking, :status_booking, :user_id, :service_id, :payment_id, :created_at_booking);`
+	query_insert_booking := `INSERT INTO bookings (date, start_time, end_time, duration_hour,status_booking, user_id, service_id, payments_id, created_at)
+		VALUES (:date, :start_time_booking, :end_time_booking, :duration_hour,:status_booking, :user_id, :service_id, :payment_id, :created_at_booking);`
 	
 	if _, err := tx.NamedExecContext(ctx, query_insert_booking, booking);err != nil {
 		return err
@@ -253,4 +257,31 @@ func (d *database) GetPriceServices(ctx context.Context, serviceID int) (*domain
 		return nil, err
 	}
 	return &data, nil
+}
+
+func (d *database) Update(ctx context.Context, req *request.BookingUpdateRequest) error {
+	// query := `
+	// 	UPDATE bookings SET date= :date, start_time = :start_time, duration_hour = :hour, status_booking = :status WHERE id= :booking_id AND deleted_at IS NULL;
+	// `
+	query := `
+		UPDATE bookings SET status_booking = :status, updated_at= :updated_at, description= :description WHERE id = :booking_id AND deleted_at IS NULL;
+	`
+	
+	if _,err:= d.db.NamedExecContext(ctx, query, req);err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *database) Delete(ctx context.Context, booking_id int, deleted_at time.Time) error {
+	query := `
+		UPDATE bookings SET deleted_at= ? WHERE id = ? AND deleted_at IS NULL; 
+	`
+
+	if _,err := d.db.ExecContext(ctx, query, deleted_at, booking_id); err != nil {
+		return err
+	}
+
+	return nil
 }

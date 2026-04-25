@@ -54,7 +54,8 @@ func Connect_DB() (*sqlx.DB, error) {
 			payment_url TEXT NOT NULL,
 			transaction_id TEXT DEFAULT NULL,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			deleted_at TIMESTAMP DEFAULT NULL
 		);
 
 		CREATE TABLE IF NOT EXISTS bussiness_hour (
@@ -65,7 +66,8 @@ func Connect_DB() (*sqlx.DB, error) {
 			is_open BOOL NOT NULL DEFAULT FALSE,
 			description TEXT,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			deleted_at TIMESTAMP DEFAULT NULL
 		);
 
 
@@ -74,6 +76,7 @@ func Connect_DB() (*sqlx.DB, error) {
 			date DATE NOT NULL,
 			start_time TIME NOT NULL,
 			end_time TIME NOT NULL,
+			duration_hour INT NOT NULL,
 			status_booking ENUM('pending', 'confirmed', 'cancelled') NOT NULL,
 			description TEXT DEFAULT NULL,
 			user_id INT NOT NULL,
@@ -81,6 +84,7 @@ func Connect_DB() (*sqlx.DB, error) {
 			service_id INT NOT NULL,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			deleted_at TIMESTAMP DEFAULT NULL,
 			FOREIGN KEY (user_id) REFERENCES users(id),
 			FOREIGN KEY (payments_id) REFERENCES payments(id),
 			FOREIGN KEY (service_id) REFERENCES services(id)

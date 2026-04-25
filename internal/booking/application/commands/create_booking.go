@@ -12,6 +12,8 @@ import (
 
 type CommandBooking interface {
 	CreateBooking(ctx context.Context, booking *request.BookingRequest, user_id int, role string) (string, string, error)
+	UpdateBooking(ctx context.Context, booking_id int, req *request.BookingUpdateRequest) error
+	DeleteBooking(ctx context.Context, booking_id int) error
 }
 
 type repoBooking struct {
@@ -64,6 +66,7 @@ func (r *repoBooking) CreateBooking(ctx context.Context, booking *request.Bookin
 		Date: time_app.Format(time.DateOnly),
 		Start_Time_Booking: start_time.Format(time.TimeOnly),
 		End_Time_Booking: end_time.Format(time.TimeOnly),
+		Duration_Hour: booking.Hour,
 		Status_Booking: "pending",
 		Users_Id: user_id,
 		Service_Id: booking.Service_id,
@@ -74,6 +77,18 @@ func (r *repoBooking) CreateBooking(ctx context.Context, booking *request.Bookin
 		return "", "", err
 	}
 
-
 	return get_Midt.Token, get_Midt.RedirectURL, nil
+}
+
+
+func (r *repoBooking) UpdateBooking(ctx context.Context, booking_id int, req *request.BookingUpdateRequest) error {
+	req.Booking_Id = booking_id
+	req.Updated_At = time.Now()
+	return r.repo.Update(ctx, req)
+}
+
+
+func (r *repoBooking) DeleteBooking(ctx context.Context, booking_id int) error {
+	deleted_at := time.Now()
+	return r.repo.Delete(ctx, booking_id, deleted_at)
 }

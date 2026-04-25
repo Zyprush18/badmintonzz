@@ -20,4 +20,6 @@ func RegisterRouteBooking(r *gin.RouterGroup, db *sqlx.DB)  {
 	r.GET("/", handl_booking.Index)
 	r.GET("/:id", handl_booking.Show)
 	r.POST("/", handl_booking.Create)
+	r.PATCH("/:id", handl_booking.Update)
+	r.DELETE("/:id", handl_booking.Delete)
 }
