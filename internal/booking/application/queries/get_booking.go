@@ -2,6 +2,7 @@ package queries
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/Zyprush18/badmintonzz/internal/booking/domain"
 	"github.com/Zyprush18/badmintonzz/internal/booking/infrastructure"
@@ -86,10 +87,10 @@ func (r *repoBooking) ParseBooking(data *domain.Bookings) booking.BookingsRespon
 		Payment: payment.PaymentResponse{
 			ID: data.Payment_id,
 			Amount: data.Amount,
-			Payment_Method: data.Payment_Method,
+			Payment_Method: sql.NullString{String: data.Payment_Method, Valid: true},
 			Payment_Status: data.Payment_Status,
 			Payment_Url: data.Payment_Url.String,
-			Transaction_id: data.Transaction_id.String,
+			Transaction_id: sql.NullString{String: data.Transaction_id.String, Valid: true},
 		},
 		Service: svc_domain.Services{
 			ID: data.Service_id,

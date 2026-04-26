@@ -8,6 +8,7 @@ import (
 
 	"github.com/Zyprush18/badmintonzz/internal/booking/infrastructure"
 	"github.com/Zyprush18/badmintonzz/internal/booking/interfaces/request"
+	"github.com/Zyprush18/badmintonzz/internal/config"
 )
 
 type CommandBooking interface {
@@ -18,10 +19,14 @@ type CommandBooking interface {
 
 type repoBooking struct {
 	repo infrastructure.RepoBooking
+	midtrans config.MidtransCfg
 }
 
-func NewCommandsBooking(r infrastructure.RepoBooking) CommandBooking {
-	return &repoBooking{repo: r}
+func NewCommandsBooking(r infrastructure.RepoBooking, m config.MidtransCfg) CommandBooking {
+	return &repoBooking{
+		repo: r,
+		midtrans: m,
+	}
 }
 
 
@@ -37,9 +42,7 @@ func (r *repoBooking) CreateBooking(ctx context.Context, booking *request.Bookin
 
 	booking.Order_Id = "badmintonzz-" + strconv.Itoa(booking.Service_id) + "-" + rand.Text()
 
-	mid := NewMidtrans(booking)
-
-	get_Midt, err := mid.SnapRequest()
+	get_Midt, err := r.midtrans.SnapRequest(booking)
 	if err != nil {
 		return "", "", err
 	}

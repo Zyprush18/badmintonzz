@@ -4,15 +4,16 @@ import (
 	"github.com/Zyprush18/badmintonzz/internal/booking/application"
 	"github.com/Zyprush18/badmintonzz/internal/booking/infrastructure"
 	"github.com/Zyprush18/badmintonzz/internal/booking/interfaces"
+	"github.com/Zyprush18/badmintonzz/internal/config"
 	"github.com/Zyprush18/badmintonzz/internal/middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 )
 
 
-func RegisterRouteBooking(r *gin.RouterGroup, db *sqlx.DB)  {
+func RegisterRouteBooking(r *gin.RouterGroup, db *sqlx.DB, m config.MidtransCfg)  {
 	repo_booking := infrastructure.NewInfrastructureBooking(db)
-	svc_booking := application.NewApplicationBooking(repo_booking)
+	svc_booking := application.NewApplicationBooking(repo_booking, m)
 	handl_booking := interfaces.NewHandlerBooking(svc_booking)
 
 	r.Use(middleware.CheckRole("admin"))

@@ -1,11 +1,14 @@
 package routes
 
 import (
+	"github.com/Zyprush18/badmintonzz/internal/config"
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 )
 
 func RegisterRoute(r *gin.RouterGroup, db *sqlx.DB)  {
+	cfg_midtrans := config.NewMidtrans()
+
 	users := r.Group("/users")
 	RegisterRouteUsers(users, db)
 
@@ -13,8 +16,8 @@ func RegisterRoute(r *gin.RouterGroup, db *sqlx.DB)  {
 	RegisterRouteServices(services, db)
 
 	booking := r.Group("/bookings")
-	RegisterRouteBooking(booking, db)
+	RegisterRouteBooking(booking, db, cfg_midtrans)
 
 	payments := r.Group("/payments")
-	RegisterRoutePayments(payments, db)
+	RegisterRoutePayments(payments, db, cfg_midtrans)
 }

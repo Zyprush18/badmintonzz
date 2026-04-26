@@ -1,4 +1,4 @@
-package commands
+package config
 
 import (
 	"os"
@@ -10,14 +10,16 @@ import (
 	"github.com/midtrans/midtrans-go/snap"
 )
 
+type MidtransCfg interface {
+	SnapRequest(requestData *request.BookingRequest) (*snap.Response, error)
+}
 
 type midtransStruct struct {
 	snap snap.Client
 	core coreapi.Client
-	requestData *request.BookingRequest
 }
 
-func NewMidtrans(req *request.BookingRequest) *midtransStruct {
+func NewMidtrans() MidtransCfg {
 	env := os.Getenv("MIDTRANS_SERVER_KEY")
 	s := snap.Client{}
 	c := coreapi.Client{}
@@ -26,17 +28,16 @@ func NewMidtrans(req *request.BookingRequest) *midtransStruct {
 	return &midtransStruct{
 		snap: s,
 		core: c,
-		requestData: req,
 	}
 }
 
 
-func (m *midtransStruct) SnapRequest() (*snap.Response, error) {
-	amount := int64(m.requestData.Price) * int64(m.requestData.Hour)
+func (m *midtransStruct) SnapRequest(requestData *request.BookingRequest) (*snap.Response, error) {
+	amount := int64(requestData.Price) * int64(requestData.Hour)
 
 	req := &snap.Request{
 		TransactionDetails: midtrans.TransactionDetails{
-			OrderID: m.requestData.Order_Id,
+			OrderID: requestData.Order_Id,
 			GrossAmt: amount,
 		},
 		CreditCard: &snap.CreditCardDetails{
@@ -48,10 +49,10 @@ func (m *midtransStruct) SnapRequest() (*snap.Response, error) {
 		EnabledPayments: snap.AllSnapPaymentType,
 		Items: &[]midtrans.ItemDetails{
 			{
-				ID: strconv.Itoa(m.requestData.Service_id),
-				Name: m.requestData.Name_svc,
-				Price: int64(m.requestData.Price),
-				Qty: int32(m.requestData.Hour),
+				ID: strconv.Itoa(requestData.Service_id),
+				Name: requestData.Name_svc,
+				Price: int64(requestData.Price),
+				Qty: int32(requestData.Hour),
 				Category: "Booking",
 			},
 		},
