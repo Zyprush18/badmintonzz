@@ -16,5 +16,6 @@ func RegisterRoutePayments(r *gin.RouterGroup, db *sqlx.DB, m config.MidtransCfg
 
 
 	r.GET("/", hndle_payment.Index)
-	r.POST("/callback", hndle_payment.CallBacksMidtrans)
+	r.GET("/:id", hndle_payment.Show)
+	r.GET("/callback", hndle_payment.CallBacksMidtransAddPayment)
 }

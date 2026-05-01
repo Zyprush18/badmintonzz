@@ -12,6 +12,7 @@ import (
 
 type MidtransCfg interface {
 	SnapRequest(requestData *request.BookingRequest) (*snap.Response, error)
+	GetData(orderID string) (*coreapi.TransactionStatusResponse, error)
 }
 
 type midtransStruct struct {

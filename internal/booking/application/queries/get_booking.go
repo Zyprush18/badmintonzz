@@ -2,7 +2,6 @@ package queries
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/Zyprush18/badmintonzz/internal/booking/domain"
 	"github.com/Zyprush18/badmintonzz/internal/booking/infrastructure"
@@ -78,7 +77,6 @@ func (r *repoBooking) ParseBooking(data *domain.Bookings) booking.BookingsRespon
 		Date: data.Date,
 		Start_Time: data.Start_Time,
 		End_Time: data.End_Time,
-		Type_Payment: data.Type_Payment,
 		Status_Booking:       data.Status,
 		Description: data.Description.String,
 		User_id:      data.User_id,
@@ -87,21 +85,28 @@ func (r *repoBooking) ParseBooking(data *domain.Bookings) booking.BookingsRespon
 		Payment: payment.PaymentResponse{
 			ID: data.Payment_id,
 			Amount: data.Amount,
-			Payment_Method: sql.NullString{String: data.Payment_Method, Valid: true},
+			Order_Id: data.Order_id.String,
+			Payment_Method: data.Payment_Method.String,
 			Payment_Status: data.Payment_Status,
 			Payment_Url: data.Payment_Url.String,
-			Transaction_id: sql.NullString{String: data.Transaction_id.String, Valid: true},
+			Transaction_id: data.Transaction_id.String,
+			Created_at: data.CreatedAt_Payment,
+			Updated_at: data.UpdatedAt_Payment,
 		},
 		Service: svc_domain.Services{
 			ID: data.Service_id,
 			Name: data.Name_Service,
 			Price: data.Price_Service,
+			Created_at: data.CreatedAt_Service,
+			Updated_at: data.UpdatedAt_Service,
 		},
 		User: user.UserResponse{
 			ID:       data.User_id,
 			Username: data.Username,
 			Email:    data.Email,
 			No_Hp:    data.No_Hp,
+			Created_at: data.CreatedAt_User,
+			Updated_at: data.UpdatedAt_User,
 		},
 		Created_at: data.CreatedAt_Booking,
 		Updated_at: data.UpdatedAt_Booking,

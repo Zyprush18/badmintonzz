@@ -14,7 +14,6 @@ type BookingsResponse struct {
 	Date string `json:"date"`
 	Start_Time string `json:"start_time"`
 	End_Time string `json:"end_time"`
-	Type_Payment string `json:"type_payment"`
 	Status_Booking string `json:"status_booking"`
 	Description string `json:"description"`
 	User_id int `json:"user_id"`

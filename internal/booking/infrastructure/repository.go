@@ -39,26 +39,33 @@ func (d *database) GetBookings(ctx context.Context) ([]domain.Bookings, error) {
 			b.date,
 			b.start_time,
 			b.end_time,
-			b.type_payment,
 			b.status_booking,
 			b.created_at as created_at_booking,
 			b.updated_at as updated_at_booking,
 
 			p.id as payments_id,
 			p.amount,
+			p.order_id,
 			p.payment_method,
 			p.payment_status,
 			p.payment_url,
 			p.transaction_id,
+			b.created_at as created_at_payment,
+			b.updated_at as updated_at_payment,
 			
 			svc.id as service_id,
 			svc.name as name_service,
 			svc.price as price_service,
+			b.created_at as created_at_service,
+			b.updated_at as updated_at_service,
 
 			u.id as user_id,
 			u.username,
 			u.email,
-			u.no_hp as phone
+			u.no_hp as phone,
+			b.created_at as created_at_user,
+			b.updated_at as updated_at_user
+			
 		FROM bookings as b
 		LEFT JOIN payments as p ON b.payments_id = p.id
 		LEFT JOIN users as u ON b.user_id = u.id
@@ -81,26 +88,33 @@ func (d *database) GetBooking(ctx context.Context, id int) (*domain.Bookings, er
 			b.date,
 			b.start_time,
 			b.end_time,
-			b.type_payment,
 			b.status_booking,
 			b.created_at as created_at_booking,
 			b.updated_at as updated_at_booking,
 
 			p.id as payments_id,
 			p.amount,
+			p.order_id,
 			p.payment_method,
 			p.payment_status,
 			p.payment_url,
 			p.transaction_id,
+			b.created_at as created_at_payment,
+			b.updated_at as updated_at_payment,
 			
 			svc.id as service_id,
 			svc.name as name_service,
 			svc.price as price_service,
+			b.created_at as created_at_service,
+			b.updated_at as updated_at_service,
 
 			u.id as user_id,
 			u.username,
 			u.email,
-			u.no_hp as phone
+			u.no_hp as phone,
+			b.created_at as created_at_user,
+			b.updated_at as updated_at_user
+
 		FROM bookings as b
 		LEFT JOIN payments as p ON b.payments_id = p.id
 		LEFT JOIN users as u ON b.user_id = u.id
@@ -122,26 +136,32 @@ func (d *database) GetBookingsByUserID(ctx context.Context, userID int) ([]domai
 			b.date,
 			b.start_time,
 			b.end_time,
-			b.type_payment,
 			b.status_booking,
 			b.created_at as created_at_booking,
 			b.updated_at as updated_at_booking,
 
 			p.id as payments_id,
 			p.amount,
+			p.order_id,
 			p.payment_method,
 			p.payment_status,
 			p.payment_url,
 			p.transaction_id,
+			b.created_at as created_at_payment,
+			b.updated_at as updated_at_payment,
 			
 			svc.id as service_id,
 			svc.name as name_service,
 			svc.price as price_service,
+			b.created_at as created_at_service,
+			b.updated_at as updated_at_service,
 
 			u.id as user_id,
 			u.username,
 			u.email,
-			u.no_hp as phone
+			u.no_hp as phone,
+			b.created_at as created_at_user,
+			b.updated_at as updated_at_user
 		FROM bookings as b
 		LEFT JOIN payments as p ON b.payments_id = p.id
 		LEFT JOIN users as u ON b.user_id = u.id
@@ -164,26 +184,33 @@ func (d *database) GetBookingByUserIdAndId(ctx context.Context, userId int, book
 			b.date,
 			b.start_time,
 			b.end_time,
-			b.type_payment,
 			b.status_booking,
 			b.created_at as created_at_booking,
 			b.updated_at as updated_at_booking,
 
 			p.id as payments_id,
 			p.amount,
+			p.order_id,
 			p.payment_method,
 			p.payment_status,
 			p.payment_url,
 			p.transaction_id,
+			b.created_at as created_at_payment,
+			b.updated_at as updated_at_payment,
 			
 			svc.id as service_id,
 			svc.name as name_service,
 			svc.price as price_service,
+			b.created_at as created_at_service,
+			b.updated_at as updated_at_service,
 
 			u.id as user_id,
 			u.username,
 			u.email,
-			u.no_hp as phone
+			u.no_hp as phone,
+			b.created_at as created_at_user,
+			b.updated_at as updated_at_user
+
 		FROM bookings as b
 		LEFT JOIN payments as p ON b.payments_id = p.id
 		LEFT JOIN users as u ON b.user_id = u.id
