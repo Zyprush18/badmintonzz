@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 	"crypto/rand"
+	"log"
 	"strconv"
 	"time"
 
@@ -35,6 +36,8 @@ func (r *repoBooking) CreateBooking(ctx context.Context, booking *request.Bookin
 	if err != nil {
 		return "", "", err
 	}
+
+	log.Println(user_id)
 
 	booking.Name_svc = data_svc.Name
 

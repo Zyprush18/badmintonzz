@@ -106,8 +106,7 @@ func (s *handlerBooking) Create(c *gin.Context) {
 	}
 
 
-	// role := c.GetString("role") -> aktifkan jika sudah terapkan login
-	role := "admin"
+	role := c.GetString("role")
 	user_id := c.GetInt("user_id")
 	
 

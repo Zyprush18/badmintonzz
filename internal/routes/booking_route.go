@@ -16,7 +16,7 @@ func RegisterRouteBooking(r *gin.RouterGroup, db *sqlx.DB, m config.MidtransCfg)
 	svc_booking := application.NewApplicationBooking(repo_booking, m)
 	handl_booking := interfaces.NewHandlerBooking(svc_booking)
 
-	r.Use(middleware.CheckRole("admin"))
+	r.Use(middleware.CheckAuthToken(), middleware.CheckRole("admin", "user"))
 
 	r.GET("/", handl_booking.Index)
 	r.GET("/:id", handl_booking.Show)

@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/Zyprush18/badmintonzz/internal/shared/encrypt"
@@ -19,24 +20,31 @@ func CheckAuthToken() gin.HandlerFunc {
 			return
 		}
 
-		token := strings.Split(authHeader, ",")
+		token := strings.Split(authHeader, " ")
 		if len(token) < 2 || token[0] != "Bearer" || token[1] == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": errs.InvalidRequest})
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid authorization header"})
 			c.Abort()
 			return
 		}
 
 
-		user_id, email , err := encrypt.ParseJWToken(token[1])
+		claims, err := encrypt.ParseJWToken(token[1])
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 			c.Abort()
 			return
 		}
 
-		c.Set("user_id", user_id)
-		c.Set("email", email)
+		id_user, err := strconv.Atoi(claims.ID)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid user ID"})
+			c.Abort()
+			return
+		}
 
+		c.Set("user_id", id_user)
+		c.Set("email", claims.Subject)
+		c.Set("role", claims.Role)
 
 		c.Next()
 	}
@@ -44,13 +52,10 @@ func CheckAuthToken() gin.HandlerFunc {
 
 func CheckRole(role ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// user_role:= c.GetString("role")
-		user_role:= "admin"
+		user_role:= c.GetString("role")
 
 		for _, r := range role {
 			if user_role == r {
-				c.Set("role", "admin") // hapus ketika sudah integrasikan login dan set role nya di middleware checkauth
-				c.Set("user_id", 1) // hapus ketika sudah integrasikan login dan set role nya di middleware checkauth
 				c.Next()
 				return
 			}

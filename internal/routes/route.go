@@ -9,8 +9,7 @@ import (
 func RegisterRoute(r *gin.RouterGroup, db *sqlx.DB)  {
 	cfg_midtrans := config.NewMidtrans()
 
-	users := r.Group("/users")
-	RegisterRouteUsers(users, db)
+	RegisterRouteUsers(r, db)
 
 	services := r.Group("/services")
 	RegisterRouteServices(services, db)

@@ -26,6 +26,132 @@ func NewHandlerUsers(s application.ServicesUsers) *HandlerUsers {
 }
 
 
+func (s *HandlerUsers) AuthRegister(c *gin.Context) {
+	ctx, cancel := cntx.TimeoutLongContext(c.Request.Context())
+	defer cancel()
+
+	req := new(request.UserAuthRegisterRequest)
+
+	if err:= c.ShouldBindJSON(req);err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": errs.InvalidRequest,
+		})
+
+		return
+	}
+
+	if err:= validation.ValidateCheckFields(ctx, req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": errs.InvalidValidation,
+			"error": err.Error(),
+		})
+		return
+	}
+
+
+	if err := s.svc.CommandsUsers().AuthRegister(ctx, req); err != nil {
+		log.Println(err.Error())
+		if errors.Is(err, context.DeadlineExceeded) {
+			c.JSON(http.StatusRequestTimeout, gin.H{"message": errs.RequestTimeout})
+			return
+		}
+
+		if domain.CheckDuplicate(err) {
+			c.JSON(http.StatusConflict, gin.H{"message": domain.DuplicateUser})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{"message": errs.ServerError})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "User registered successfully",
+	})
+
+}
+
+
+func (s *HandlerUsers) AuthLogin(c *gin.Context) {
+	ctx, cancel := cntx.TimeoutLongContext(c.Request.Context())
+	defer cancel()
+
+	req := new(request.UserAuthLoginRequest)
+
+	if err := c.ShouldBindJSON(req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": errs.InvalidRequest,
+		})
+		return
+	}
+
+	if err:= validation.ValidateCheckFields(ctx, req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": errs.InvalidValidation,
+			"error": err.Error(),
+		})
+		return
+	}
+
+	token, err := s.svc.CommandsUsers().AuthLogin(ctx, req)
+	if err != nil {
+		log.Println(err.Error())
+		if errors.Is(err, context.DeadlineExceeded) {
+			c.JSON(http.StatusRequestTimeout, gin.H{"message": errs.RequestTimeout})
+			return
+		}
+
+		if err.Error() == "invalid credentials" || errors.Is(err, errs.NotFoundRow) {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "email or password invalid"})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{"message": errs.ServerError})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Login successful",
+		"token":   token,
+	})
+}
+
+func (s *HandlerUsers) GetProfile(c *gin.Context) {
+	id := c.GetString("user_id")
+	userID, err := strconv.Atoi(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": domain.InvalidID})
+		return
+	}
+
+	ctx, cancel := cntx.TimeoutShortContext(c.Request.Context())
+	defer cancel()
+
+	user, err := s.svc.QueriesUsers().GetUser(ctx, userID)
+	if err != nil {
+		log.Println(err.Error())
+
+		if errors.Is(err, context.DeadlineExceeded) {
+			c.JSON(http.StatusRequestTimeout, gin.H{"message": errs.RequestTimeout})
+			return
+		}
+
+		if errors.Is(err, errs.NotFoundRow) {
+			c.JSON(http.StatusNotFound, gin.H{"message": domain.NotFoundUser})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{"message": errs.ServerError})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Success",
+		"data":    user,
+	})
+}
+
+
 func (s *HandlerUsers) Index(c *gin.Context) {
 	ctx, cancel := cntx.TimeoutLongContext(c.Request.Context())
 	defer cancel()

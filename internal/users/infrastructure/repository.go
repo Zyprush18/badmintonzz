@@ -9,6 +9,7 @@ import (
 )
 
 type UsersRepo interface {
+	GetUserByEmail(ctx context.Context, email string) (*domain.Users, error)
 	GetUsers(ctx context.Context) ([]domain.Users, error)
 	GetUser(ctx context.Context, id int) (*domain.Users, error)
 	CreateUser(ctx context.Context, user *request.UserRequest) error
@@ -24,6 +25,14 @@ type repoUsers struct {
 
 func NewRepoUsers(d *sqlx.DB) UsersRepo {
 	return &repoUsers{db: d}
+}
+
+func (u *repoUsers) GetUserByEmail(ctx context.Context, email string) (*domain.Users, error) {
+	var user domain.Users
+	if err := u.db.GetContext(ctx, &user, "SELECT * FROM users WHERE email = ?", email); err != nil {
+		return nil, err
+	}
+	return &user, nil
 }
 
 

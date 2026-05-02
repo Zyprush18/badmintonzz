@@ -2,40 +2,47 @@ package encrypt
 
 import (
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/Zyprush18/badmintonzz/internal/shared/errs"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var secretKey = []byte(os.Getenv("JWT_SECRET_KEY"))
+type customClaims struct {
+	Role   string `json:"role"`
+	jwt.RegisteredClaims
+}
 
-func GenerateJWToken(user_id int, email string) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": user_id,
-		"email":   email,
-		"exp":     time.Now().Add(time.Hour * 24).Unix(),
-	})
+func GenerateJWToken(user_id int, email, role string) (string, error) {
+	claims := customClaims{
+		Role:   role,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ID: strconv.Itoa(user_id),
+			Subject: email,
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
+		},
+	}
 
-	return token.SignedString(secretKey)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	return token.SignedString([]byte(os.Getenv("JWT_SECRET_KEY")))
 }
 
 
-func ParseJWToken(token string) (int, string, error) {
-	t, err := jwt.ParseWithClaims(token, &jwt.MapClaims{}, func(t *jwt.Token) (interface{}, error) {
-		return secretKey, nil
-	}, nil)
+func ParseJWToken(token string) (*customClaims, error) {
+	t, err := jwt.ParseWithClaims(token, &customClaims{}, func(t *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("JWT_SECRET_KEY")), nil
+	})
 	
 	if err != nil {
-		return 0, "", err
+		return nil, err
 	}
 
-	claims, ok := t.Claims.(jwt.MapClaims)
+	claims, ok:= t.Claims.(*customClaims)
 	if !ok {
-		return 0, "", errs.InvalidClaims
+		return nil, errs.InvalidClaims
 	}
 
-	user_id := int(claims["user_id"].(float64))
-	email := claims["email"].(string)
-	return user_id, email, nil
+	return claims, nil
 }

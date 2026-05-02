@@ -2,6 +2,7 @@ package commands
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/Zyprush18/badmintonzz/internal/shared/encrypt"
@@ -10,6 +11,8 @@ import (
 )
 
 type ServiceUsers interface {
+	AuthLogin(ctx context.Context, user *request.UserAuthLoginRequest) (string,error)
+	AuthRegister(ctx context.Context, user *request.UserAuthRegisterRequest) error
 	CreateUsers(ctx context.Context, user *request.UserRequest) error
 	UpdateUsers(ctx context.Context, id int, user *request.UserRequest) error
 	DeleteUsers(ctx context.Context, id int) error
@@ -21,6 +24,43 @@ type repoUsers struct {
 
 func GetCommandsUsers(r infrastructure.UsersRepo) ServiceUsers {
 	return &repoUsers{repo: r}
+}
+
+
+func (r *repoUsers) AuthRegister(ctx context.Context, user *request.UserAuthRegisterRequest) error {
+	hashedPassword, err := encrypt.HashingPassword(user.Password)
+	if err != nil {
+		return err
+	}
+
+	req := &request.UserRequest{
+		Username: user.Username,
+		Email: user.Email,
+		Password: hashedPassword,
+		Phone: user.Phone,
+		Role: "user",
+	}
+
+	return r.repo.CreateUser(ctx, req)
+}
+
+
+func (r *repoUsers) AuthLogin(ctx context.Context, user *request.UserAuthLoginRequest) (string,error) {
+	data, err := r.repo.GetUserByEmail(ctx, user.Email)
+	if err != nil {
+		return "", err
+	}
+
+	if !encrypt.CheckHashingPassword(data.Password, user.Password) {
+		return "", fmt.Errorf("invalid credentials")
+	}
+
+	token, err := encrypt.GenerateJWToken(data.ID, data.Username, data.Role)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
 
 
